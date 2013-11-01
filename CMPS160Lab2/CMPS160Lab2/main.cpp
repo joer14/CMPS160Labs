@@ -1,32 +1,34 @@
 /**
-* CMPS 160L (Fall 2011)
+* CMPS 160L (Fall 2013)
 * Lab 2: Animated Animal
+* Joe Rowley jrowley@ucsc.edu 
 */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <GLUT/glut.h>
-
+#include <math.h>
 #include "util.h"
 // Global variables
 float angle = 0;
 float armA = 0;
+float armA2 = 0;
 float spinA = 0;
 float teaA = 0;
 float bodyTwerk = 1;
 static int dup = 1;
-static int shoulder1 = 0, elbow1 = 0, shoulder2 = 0, elbow2 = 0, knee1=0, knee2=0, ank1=0, ank2=0;
+static int knee1=0, knee2=0, ank1=0, ank2=0;
 bool is_spinning = false;
 bool wireframe = false;
 bool rKnee1 = true;
 bool rAnk1 = true;
 bool rAnk2 = false;
-bool animate = true;
+bool animate = false;
 bool armABack = true;
 bool moveArm = true;
 bool moveTea = false;
-
+static int rt=255, bt=0, gt=200;
 // Do spin
 void spin() {
 	if (is_spinning) {
@@ -36,7 +38,7 @@ void spin() {
 		is_spinning = true;
 	}
 }
-
+//didnt end up using this
 void bananaBody(){
     glPushMatrix();
     glScalef(.1,.1,.1);
@@ -107,6 +109,47 @@ void bananaBody(){
     
     
 }
+void eye(){
+    //face
+    glPushMatrix();
+    glColor3ub(160, 220, 250);
+    glTranslatef(1.5,0.25,-2);
+    glutSolidSphere(.25,5,5);
+    glTranslatef(0,-0.5,0);
+    glColor3ub(160, 220, 250);
+    glutSolidSphere(.25,5,5);
+    glPopMatrix();
+    
+}
+void mouth(){
+    glColor3ub(245, 29, 201);
+    glPushMatrix();
+    glTranslatef(1.5,0,0);
+
+//    glScalef(.2,.2,.2);
+    
+    glBegin(GL_TRIANGLE_STRIP);
+    glVertex3f(0,0,0);
+    glVertex3f(1,2,0);
+    glVertex3f(-1,2,0);
+//    //middle section
+//    glVertex3f(-1,5,0);
+//    glVertex3f(1,5,0);
+//    
+//    glVertex3f(1,2,0);
+//    //top
+//    glVertex3f(-1,5,0);
+//    glVertex3f(1,5,0);
+//    glVertex3f(0,7,-1);
+    glEnd();
+    glPopMatrix();
+}
+
+void face(){
+    eye();
+//    mouth();
+//    glPushMatrix()
+}
 void body(){
     glColor3ub(245, 239, 37);
     glRotatef(90,1,0,0);
@@ -151,11 +194,15 @@ void body(){
 
     glMultMatrixf(shear4);
     glutWireCone(1,3,4,5);
-    glPopMatrix();
-
     
-
+    glPopMatrix();
+    face();
+    
+    
+    
+    glPopMatrix();
 }
+
 
 //void leg(){
 //    glRotatef(-90,0,0,1);
@@ -217,10 +264,9 @@ void leftArm(){
     
     
 }
-
 void rightArm(){
     glColor3ub(255, 200, 0);
-    glRotatef(-180,1,0,0);
+    
     glRotatef(90,0,1,0);
     glScalef(.5,1,.5);
     glPushMatrix();
@@ -233,19 +279,35 @@ void rightArm(){
     glPopMatrix();
     
     glTranslatef (1.0, 0.0, 0.0);
-    glRotatef ((GLfloat) armA, 0, 1.0, 0);
-    
+    glRotatef ((GLfloat) armA, 0, 1.0, 0); //swing
     glTranslatef (2, 0.0, 0.0);
     glPushMatrix();
     glScalef (5.0, 0.4, 1.0);
     glutWireCube (1.0);
     glPopMatrix();
+    
+    glTranslatef (2.0, 0.0, 0.0);
+    glRotatef(-armA2/2,0,0,1);
+    glRotatef ((GLfloat) armA, 0, 1.0, 0); //swing
+    glTranslatef (2, 0.0, 0.0);
+    glPushMatrix();
+    glScalef (5.0, 0.4, 1.0);
+    glutWireCube (1.0);
+    glPopMatrix();
+    
+    
     glPushMatrix();
     glPopMatrix();
     glTranslatef(2,0,0);
     glRotatef ((GLfloat) -teaA, 0.0, 0.0, 1.0);
-    
+//    rt=;
+    int teaA2 = (int)teaA;
+    rt=(int)(255 - teaA2*(255/90));
+    gt=(int)(200 - teaA2*(200/90));
+    bt=(int)(teaA2*255/90);
+    glColor3ub(rt, gt, bt);
     glutWireTeapot(1);
+//    printf("teaA %d, %d, %d, %d\n",(int)teaA,rt,gt,bt);
     
     
     glPopMatrix();
@@ -313,10 +375,7 @@ void rightLeg(){
     glPopMatrix();
     glPopMatrix();
 }
-void wiggle(){
-    //demo wiggling feet, hands, individually...
-    //set camera to good view port automatically for this. 
-}
+
 void animateKnee(){
     if(rKnee1){
         knee1 = (knee1 + 5) % 360;
@@ -370,37 +429,32 @@ void teaTime(){
     if (!moveArm && !moveTea){
         teaA = ((int)teaA - 1) % 360;
     }
-//    printf("move arm:%d, move tea:%d\n",moveArm,moveTea);
-//    printf("angle : %d\n",(int)teaA);
-//    printf(moveArm ? "Armtrue\n" : "Armfalse\n");
-
-//
-//    if (teaA == 0 && !moveTea){
-////        moveArm = true;
-//    }
     
     }
 
 void animateArm(){
-//    clock_t t;
-//    t = clock();
-////    t = clock() - t;
-//    int j=(((int)t)/CLOCKS_PER_SEC);
-////    armA = j % 360;
-//    
+ 
+//    printf("armA: %d\n", (int)teaA);
     
-    
+
     if (moveArm) {
         if (!armABack){
             armA = ((int)armA + 1) % 360;
-        }else armA = ((int)armA - 1) % 360;
+            
+            if (armA2 < 45){
+            armA2 = ((int)armA2 + 1) % 360;
+            }
+
+        }else {
+            armA = ((int)armA - 1) % 360;
+                armA2 = ((int)armA2 - 1) % 360;
+        }
         
         if (armA > 45){
             armABack = true;
             moveArm = false;
             moveTea = true;
             teaTime();
-            //        moveArm = true;
         }
         if (armA < -45){
             armABack = false;
@@ -408,11 +462,10 @@ void animateArm(){
         
     }
     else teaTime();
-//    printf ("It took me (%f seconds).\n",((float)t)/CLOCKS_PER_SEC);
-//    armA = ((int)armA + 5) % 360;
 }
 
 void animalTime(){
+    glPushMatrix();
     glPushMatrix();
     glTranslatef(0,.3,-.5);
     glScalef(1,1.5,.5);
@@ -425,17 +478,18 @@ void animalTime(){
     glPopMatrix();
     glPushMatrix();
     glTranslatef(0,5,0);
-    leftArm();
+    rightArm();
     glPopMatrix();
     glPushMatrix();
     glTranslatef(0,5,0);
-    glScalef(1,1,-1);
-    leftArm();
+    glScalef(-1,1,-1);
+    rightArm();
     glPopMatrix();
     
     glPushMatrix();
     glTranslatef(0,3,0);
     body();
+    glPopMatrix();
     glPopMatrix();
 }
 void duplicate(bool add){
@@ -479,7 +533,7 @@ void cb_display() {
     
     for (int i=0; i<dup; i++){
         glPushMatrix();
-        glTranslatef(i*2,0,i*2);
+        glTranslatef(i*6,0,i*6);
         animalTime();
         glPopMatrix();
     }
@@ -533,41 +587,50 @@ void cb_keyboard(unsigned char key, int x, int y) {
 		case 's':
 			spin();
 			break;
-        case 't':
-            shoulder1 = (shoulder1 + 5) % 360;
-//            glutPostRedisplay();
-            break;
-        case 'T':
-            shoulder1 = (shoulder1 - 5) % 360;
-//            glutPostRedisplay();
-            break;
-        case 'e':  /*  e key rotates at elbow  */
-            elbow1 = (elbow1 + 5) % 360;
-//            glutPostRedisplay();
-            break;
-        case 'E':
-            elbow1 = (elbow1 - 5) % 360;
-//            glutPostRedisplay();
         case 'g':
             knee1 = (knee1 + 5) % 360;
-            //            glutPostRedisplay();
             break;
         case 'G':
             knee1 = (knee1 - 5) % 360;
-            //            glutPostRedisplay();
             break;
-        case 'h':  /*  e key rotates at elbow  */
+        case 'h':
+            knee2 = (knee2 + 5) % 360;
+            break;
+        case 'H':
+            knee2 = (knee2 - 5) % 360;
+            break;
+        case 'J': 
             ank1 = (ank1 + 5) % 360;
-            //            glutPostRedisplay();
             break;
+        case 'j':  
+            ank1 = (ank1 - 5) % 360;
+            break;
+        case 'K': 
+            ank2 = (ank2 + 5) % 360;
+            break;
+        case 'k': 
+            ank2 = (ank2 - 5) % 360;
+            break;
+            
         case 'o':
-            bodyTwerk = (bodyTwerk - .1);
-            //            glutPostRedisplay();
+            armA = ((int)armA - 5) % 360;
             break;
         case 'O':
-            bodyTwerk = (bodyTwerk + .1);
-            //            glutPostRedisplay();
+            armA = ((int)armA + 5) % 360;
             break;
+        case 'i':
+            armA2 = ((int)armA2 - 5) % 360;
+            break;
+        case 'I':
+            armA2 = ((int)armA2 + 5) % 360;
+            break;
+        case 'p':
+            teaA = ((int)teaA - 5) % 360;
+            break;
+        case 'P':
+            teaA = ((int)teaA + 5) % 360;
+            break;
+    
         case 'd':
             duplicate(0);
             break;
@@ -600,7 +663,7 @@ int main(int argc, char** argv) {
 	glutKeyboardFunc(cb_keyboard);
 
 	glClearColor(0,0,0,0); // set background to black
-
+    printf("Welcome! Here are the controls. \n A on/off Animation \n S on/off spining \n Q to Quit \n \n G g Move Right Leg \n H h Move Left Leg \n J j move Right Foot \n K k Move Left Foot \n U u Change rotation 1st arm segment \n I i Change rotation 2nd arm segment \n O o Pour Tea");
 	glutMainLoop();
 
 	return 0;
