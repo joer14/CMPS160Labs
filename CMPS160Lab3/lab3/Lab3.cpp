@@ -19,7 +19,7 @@ int windowWidth, windowHeight;
 
 float spinAngle = 0;
 bool is_spinning = false;
-
+bool dListOn= true;
 canvas_t terrain;
 canvas_t skin;
 GLuint texture;
@@ -27,16 +27,14 @@ GLuint texture;
 float farPlane, nearPlane;
 
 
-float ambientColour[3];
+float ambientC[3];
 float lightP[4];
-float diffuseColour[3];
-float** hMap;
 
 float lightX=60;
 float lightY=40;
 float lightZ=60;
 //GLuint texture;
-GLuint terrainDL;
+GLuint theList;
 
 void drawTexture() {
 	int x, z;
@@ -72,28 +70,6 @@ void drawTexture() {
 
 void loadHeights(){
     
-//    printf("loading heights\n");
-//    hMap = new float*[terrain.height];
-//    
-//    //create array for hMap
-//    
-//    for(int i = 0; i < terrain.height; i++){
-//        hMap[i] = new float[terrain.width];
-//    }
-//    
-//    printf("loading heights\n");
-//    //creating hMap such that hMap[z][x]=y
-//    
-//    for(int z = 0; z < terrain.height; z++){
-//        for(int x = 0; x < terrain.width; x++){
-//            pixel_t pixel = PIXEL(terrain, x, z);
-//            float y = (((float)RED(pixel)) / 255.0f) * 100;
-//            //          printf ("x: %d red: %f z: %d\n", x,y,z);
-//            hMap[z][x] = y;
-//        }
-//    }
-//    
-//    printf("done loading heights\n");
 }
 //face normal is regular - computes the cross product between 2 given vectors
 //
@@ -139,6 +115,8 @@ void compute_normal(float *result, int x, int z, bool upper) {
     if (z-5 == terrain.height) return;
     if (x+5 > terrain.width) return;
     if (z+5 > terrain.height) return;
+
+   
     
 //    printf("z: %d x: %d\n",z, x);
   
@@ -150,16 +128,19 @@ void compute_normal(float *result, int x, int z, bool upper) {
     //float(RED(PIXEL(terrain, x, z)))
     float e1[3];
     float e2[3];
+    float r2[3];
     if (!upper){
         diff(e1,v2,v1);
         diff(e2,v3,v1);
         cross(result,e1,e2);
-        normalize(result, result);
+//        normalize(r2, r2);
+//         printf("for x: %d, y:%f, z:%d \n",x,float(RED(PIXEL(terrain, x, z))),z);
+//         printf("x: %f, y:%f, z:%f \n",r2[0],r2[1],r2[2]);
     }else{
         diff(e1,v2,v4);
         diff(e2,v3,v4);
         cross(result,e1,e2);
-        normalize(result, result);
+//        normalize(result, r2);
     }
     
 }
@@ -171,7 +152,44 @@ void spin() {
 		is_spinning = true;
 	}
 }
-
+void DebugTerrain(){
+    
+    float the_normal[3];//
+    
+    for(int z = 0; z < terrain.height-1; z++){
+        for(int x = 0; x < terrain.width-1; x++){
+            
+            //upper
+            compute_normal(the_normal, x, z, true);
+            glNormal3f(the_normal[0], the_normal[1], the_normal[2]);
+            
+            //x, y, z
+            glTexCoord2f((float)(x) / terrain.width, (float)(z) / terrain.height);
+            glVertex3f(x, float(RED(PIXEL(terrain, x, z))), z);
+            //x,y,z+1
+            glTexCoord2f((float)(x) / terrain.width, (float)(z+1) / terrain.height);
+            glVertex3f(x,float(RED(PIXEL(terrain, x, z+1))), z+1 );
+            //x+1,y,z
+            glTexCoord2f((float)(x+1) / terrain.width, (float)(z) / terrain.height);
+            glVertex3f(x+1, float(RED(PIXEL(terrain, x+1, z))),z );
+            
+            
+            //lower
+            compute_normal(the_normal, x, z, false);
+            glNormal3f(the_normal[0], the_normal[1], the_normal[2]);
+            //x,y,z+1
+            glTexCoord2f((float)(x) / terrain.width, (float)(z+1) / terrain.height);
+            glVertex3f(x, float(RED(PIXEL(terrain, x, z+1))), z+1);
+            //x+1,y,z
+            glTexCoord2f((float)(x+1) / terrain.width, (float)(z) / terrain.height);
+            glVertex3f(x+1, float(RED(PIXEL(terrain, x+1, z))), z);
+            //x+1, y+1, z+1
+            glTexCoord2f((float)(x+1) / terrain.width, (float)(z+1) / terrain.height);
+            glVertex3f(x+1, float(RED(PIXEL(terrain, x+1, z+1))), z+1);
+        }
+    }
+    
+}
 void drawTerrain(){
     
     glEnable(GL_TEXTURE_2D);
@@ -182,7 +200,7 @@ void drawTerrain(){
     float the_normal[3];//
     
     glBegin(GL_TRIANGLES);
-    
+    glEnable(GL_NORMALIZE);
     for(int z = 0; z < terrain.height-1; z++){
         for(int x = 0; x < terrain.width-1; x++){
         
@@ -226,73 +244,77 @@ void drawTerrain(){
 
 
 
-void rotateCamera(void)
-{
+void rotateCamera(void){
     glRotatef(xRotation, 1, 0, 0);
     glRotatef(yRotation, 0, 1, 0);
     glTranslatef(-xposition, -yposition, -zposition);
+    
+    // Rotate along y-axis
+	if (is_spinning) {
+		glRotatef(spinAngle, 0, 1, 0);
+		spinAngle = spinAngle+1;
+	}
+}
+
+void newDList(){
+    theList = glGenLists(1);
+    glNewList(theList, GL_COMPILE);
+    //drawing functions below
+        drawTerrain();
+    glEndList();
 }
 
 
 void cb_display() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
+   
+    
+    rotateCamera();
+    
+    //
+    //let there be light!
+    //
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+    glEnable(GL_COLOR_MATERIAL);
+    glShadeModel(GL_SMOOTH);
+    
+    
+    glPushMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(90, windowWidth/windowHeight, nearPlane, farPlane);
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+
     gluLookAt(200,200,200,
               0,0,0,
               0,1,0);
-    rotateCamera();
-    // Rotate along y-axis
-	if (is_spinning) {
-		glRotatef(spinAngle, 0, 1, 0);
-		spinAngle++;
-	}
-	draw_axis(4.0);
+    
+    
+    
+    glPushMatrix();
+    
+    //if we should use the displaylist then use that,
+    // otherwise render the regular way
+    
+    if(dListOn){
+        glCallList(theList);
+    }
+    else{
+        drawTerrain();
+    }
+    glLightfv(GL_LIGHT0, GL_POSITION, lightP);
+    glPopMatrix();
+
+    
+    draw_axis(4.0);
     drawTerrain();//
 	drawTexture();
 	glFlush();
 	glutSwapBuffers(); // for smoother animation
-
-
-//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//    glLoadIdentity();
-//    camera();
-//    enableLight();
-//    
-//    glPushMatrix();
-//    glMatrixMode(GL_PROJECTION);
-//    glLoadIdentity();
-//    gluPerspective(90, windowWidth/windowHeight, nearPlane, farPlane);
-//    glMatrixMode(GL_MODELVIEW);
-//    glPopMatrix();
-//    
-//    //glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambientColor);
-//    //GLfloat lightColor0[] = {.6, .6, .6, 1};
-//    //GLfloat lightPos0[] = {-.5, .8, .1, 0};
-//    //glLightfv(GL_LIGHT0, GL_DIFFUSE, lightColor0);
-//    //glLightfv(GL_LIGHT0, GL_POSITION, lightPos0);
-//    
-//    float scale = 30.0f / max(terrain.width -1, terrain.height -1);
-//    glScalef(scale, scale, scale);
-//    gluLookAt(0, 300, 0, 0, 0, 0, 1, 0, 0);
-//    
-//    glPushMatrix();
-//    if(displayListON)
-//    {
-//        glCallList(terrainDL);
-//    }
-//    else
-//    {
-//        renderEverything(false);
-//    }
-//    glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
-//    glPopMatrix();
-//    
-//    glPushMatrix();
-//    draw_axis(300);
-//    glPopMatrix();
-//    
-//    glFlush();
-//    glutSwapBuffers();
 
 
 
@@ -490,9 +512,14 @@ int main(int argc, char** argv) {
 	
     nearPlane = .1;
     farPlane = 1000;
-    
+//    ambientC[0] = .4;
+//    ambientC[1] = .4;
+//    ambientC[2] = .4;
+//    
     glDepthFunc(GL_LEQUAL);
     glEnable(GL_NORMALIZE);
+    newDList();
+    
 //    createTerrainDisplayList();
 	
 	glutDisplayFunc(cb_display);
