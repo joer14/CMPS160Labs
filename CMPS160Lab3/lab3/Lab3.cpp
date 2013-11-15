@@ -28,10 +28,13 @@ float farPlane, nearPlane;
 
 
 float ambientColour[3];
-float lightPosition[4];
+float lightP[4];
 float diffuseColour[3];
 float** hMap;
 
+float lightX=60;
+float lightY=40;
+float lightZ=60;
 //GLuint texture;
 GLuint terrainDL;
 
@@ -60,7 +63,7 @@ void drawTexture() {
     glTexCoord2f(1.0f,0.0f);
     glVertex3f(10,-10,0);
 	glEnd();
-	glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
+	glLightfv(GL_LIGHT0, GL_POSITION, lightP);
     
 	glDisable(GL_TEXTURE_2D);
 }
@@ -248,6 +251,52 @@ void cb_display() {
 	drawTexture();
 	glFlush();
 	glutSwapBuffers(); // for smoother animation
+
+
+//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//    glLoadIdentity();
+//    camera();
+//    enableLight();
+//    
+//    glPushMatrix();
+//    glMatrixMode(GL_PROJECTION);
+//    glLoadIdentity();
+//    gluPerspective(90, windowWidth/windowHeight, nearPlane, farPlane);
+//    glMatrixMode(GL_MODELVIEW);
+//    glPopMatrix();
+//    
+//    //glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambientColor);
+//    //GLfloat lightColor0[] = {.6, .6, .6, 1};
+//    //GLfloat lightPos0[] = {-.5, .8, .1, 0};
+//    //glLightfv(GL_LIGHT0, GL_DIFFUSE, lightColor0);
+//    //glLightfv(GL_LIGHT0, GL_POSITION, lightPos0);
+//    
+//    float scale = 30.0f / max(terrain.width -1, terrain.height -1);
+//    glScalef(scale, scale, scale);
+//    gluLookAt(0, 300, 0, 0, 0, 0, 1, 0, 0);
+//    
+//    glPushMatrix();
+//    if(displayListON)
+//    {
+//        glCallList(terrainDL);
+//    }
+//    else
+//    {
+//        renderEverything(false);
+//    }
+//    glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
+//    glPopMatrix();
+//    
+//    glPushMatrix();
+//    draw_axis(300);
+//    glPopMatrix();
+//    
+//    glFlush();
+//    glutSwapBuffers();
+
+
+
+
 }
 
 void loadTextureMap(canvas_t tex) {
@@ -276,7 +325,7 @@ void cb_reshape(int w, int h) {
     glViewport(0, 0, w, h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(90.0, aspectRatio, .1, 1000); // necessary to preserve aspect ratio
+    gluPerspective(90.0, aspectRatio, nearPlane, farPlane);
     glMatrixMode(GL_MODELVIEW);
 }
 
@@ -308,28 +357,28 @@ void callback_keyboard(unsigned char key, int x, int y) {
             //            eraser();
             break;
     }
-    if(key == 'j')
-        nearPlane -= 2;
-    if(key == 'k')
-        nearPlane += 2;
+    if(key == 'n')
+        nearPlane -= 100;
+    if(key == 'N')
+        nearPlane += 100;
     if(nearPlane < 0)
         nearPlane = .1;
     
-    if(key == 'n')
-        farPlane -= 2;
     if(key == 'm')
-        farPlane += 2;
+        farPlane -= 100;
+    if(key == 'M')
+        farPlane += 100;
     if(farPlane < 0)
-        farPlane = 50;
+        farPlane = 1000;
     
     
-    if(key == 'f')
+    if(key == 'c')
     {
         xRotation += 1;
         if(xRotation > 360) xRotation -= 360;
     }
     
-    if(key == 'g')
+    if(key == 'v')
     {
         xRotation -= 1;
         if(xRotation < -360) xRotation -= 360;
@@ -371,7 +420,26 @@ void callback_keyboard(unsigned char key, int x, int y) {
     }
     if (key =='S') spin();
     
+    if( key =='i'){
+        lightX += 20;
+        printf("Moved Light Down\n");
+    }
+    if( key =='k'){
+        lightX -= 20;
+        
+        printf("Moved Light Up \n");
+    }
+    if( key =='j'){
+        lightZ += 20;
+        
+        printf("Moved Light Right\n");
+    }
+    if( key =='l'){
+        lightZ -= 20;
+        printf("Moved Light Left\n");
+    }
     
+//    cb_reshap
 }
 
 
@@ -401,7 +469,18 @@ int main(int argc, char** argv) {
 		printf("Usage: %s terrain.ppm texture.ppm\n", argv[0]);
 		return 1;
 	}
-    
+    printf("Welcome!!!\n"
+           "Controls:\n\n"
+           "c/v to rotate up/down \n"
+           "WASD to move around the terrain\n"
+           "n/N to decrease/increase near plane distance\n "
+           "m/M to decrease/increase far plane distance\n "
+           "i/k to move the light up/down\n "
+           "j/l to move the light left/right\n"
+           "S to spin\n"
+           "F switch from Face normals to vertex normals\n"
+           "q to quit\n"
+           );
 	//terrain->drawTerrain();
     loadHeights();
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -415,8 +494,6 @@ int main(int argc, char** argv) {
     glDepthFunc(GL_LEQUAL);
     glEnable(GL_NORMALIZE);
 //    createTerrainDisplayList();
-    int cam_pos[3] = {0,0,15};
-    int center_pos[3] = {0,0,0};
 	
 	glutDisplayFunc(cb_display);
 	glutReshapeFunc(cb_reshape);
