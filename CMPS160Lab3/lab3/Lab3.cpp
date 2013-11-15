@@ -29,11 +29,13 @@ float farPlane, nearPlane;
 
 
 float ambientC[3];
+float lightX=0;
+float lightY=-500;
+float lightZ=0;
 float lightP[4];
+//float lightP[4]={lightX,lightY,lightZ,1.0};
 
-float lightX=60;
-float lightY=40;
-float lightZ=60;
+
 //GLuint texture;
 GLuint theList;
 
@@ -116,33 +118,59 @@ void compute_normal(float *result, int x, int z, bool upper) {
     if (z-5 == terrain.height) return;
     if (x+5 > terrain.width) return;
     if (z+5 > terrain.height) return;
-
+    
+    float e1[3] = {1.0f,float(RED(PIXEL(terrain, x, z+1)))-float(RED(PIXEL(terrain, x, z))),0.0f};
+    float e2[3] = {0.0f,float(RED(PIXEL(terrain, x+1, z)))-float(RED(PIXEL(terrain, x, z))),1.0f};
+    float e3[3] = {-1.0f,float(RED(PIXEL(terrain, x+1, z)))-   float(RED(PIXEL(terrain, x, z+1))),1.0f};
+    float e4[3] = {0.0f,float(RED(PIXEL(terrain, x+1, z+1)))- float(RED(PIXEL(terrain, x, z+1))), 1.0f};
    
+//    cross.x = e1.y*e2.z - e1.z*e2.y
+//    cross.y = e1.z*e2.x - e1.x*e2.z
+//    cross.z = e1.x*e2.y - e1.y*e2.x
     
-//    printf("z: %d x: %d\n",z, x);
-  
-    float v1[3]= {(float)x,float(RED(PIXEL(terrain, x, z))), (float)z};
-    float v2[3]= {(float)x,float(RED(PIXEL(terrain, x, z+1))), (float)z+1};
-    float v3[3]= {(float)x+1,float(RED(PIXEL(terrain, x+1, z))), (float)z};
-    float v4[3]= {(float)x+1, float(RED(PIXEL(terrain, x+1, z+1))), (float)z+1};
-    
-    //float(RED(PIXEL(terrain, x, z)))
-    float e1[3];
-    float e2[3];
-    float r2[3];
-    if (!upper){
-        diff(e1,v2,v1);
-        diff(e2,v3,v1);
-        cross(result,e1,e2);
-//        normalize(r2, r2);
-//         printf("for x: %d, y:%f, z:%d \n",x,float(RED(PIXEL(terrain, x, z))),z);
-//         printf("x: %f, y:%f, z:%f \n",r2[0],r2[1],r2[2]);
+    //    cross.x = e1.1*e2.2 - e1.2*e2.1
+    //    cross.y = e1.2*e2.0 - e1.0*e2.2
+    //    cross.z = e1.0*e2.1 - e1.1*e2.0
+    if(upper){
+        result[0] = e1[1]*e2[2]-e1[2]*e2[1];
+        result[1] = e1[2]*e2[0]-e1[0]*e2[2];
+        result[2] = e1[0]*e2[1]-e1[1]*e2[0];
+        
+        return;
     }else{
-        diff(e1,v2,v4);
-        diff(e2,v3,v4);
-        cross(result,e1,e2);
-//        normalize(result, r2);
+        result[0] = e3[1]*e4[2]-e3[2]*e4[1];
+        result[1] = e3[2]*e4[0]-e3[0]*e4[2];
+        result[2] = e3[0]*e4[1]-e3[1]*e4[0];
+        result[0] = -result[0];
+        result[1] = -result[1];
+        result[2] = -result[2];
+        return;
     }
+    
+//////    printf("z: %d x: %d\n",z, x);
+////  
+//    float v1[3]= {(float)x,float(RED(PIXEL(terrain, x, z))), (float)z};
+//    float v2[3]= {(float)x,float(RED(PIXEL(terrain, x, z+1))), (float)z+1};
+//    float v3[3]= {(float)x+1,float(RED(PIXEL(terrain, x+1, z))), (float)z};
+//    float v4[3]= {(float)x+1, float(RED(PIXEL(terrain, x+1, z+1))), (float)z+1};
+//    
+//    //float(RED(PIXEL(terrain, x, z)))
+//    float e1[3];
+//    float e2[3];
+//    float r2[3];
+//    if (upper){
+//        diff(e1,v2,v1);
+//        diff(e2,v3,v1);
+//        cross(result,e1,e2);
+////        normalize(r2, r2);
+////         printf("for x: %d, y:%f, z:%d \n",x,float(RED(PIXEL(terrain, x, z))),z);
+////         printf("x: %f, y:%f, z:%f \n",r2[0],r2[1],r2[2]);
+//    }else{
+//        diff(e1,v2,v4);
+//        diff(e2,v3,v4);
+//        cross(result,e1,e2);
+////        normalize(result, r2);
+//    }
     
 }
 void spin() {
@@ -156,6 +184,10 @@ void spin() {
 
 void drawTerrain(){
     
+    lightP[0] = lightX;
+    lightP[1] = lightY;
+    lightP[2] = lightZ;
+    
     if(textureOn){
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -165,8 +197,12 @@ void drawTerrain(){
 
     float the_normal[3];//
     
-    glBegin(GL_TRIANGLES);
+    
     glEnable(GL_NORMALIZE);
+    glBegin(GL_TRIANGLES);
+//    GLfloat amDiffuse[] = {0.f, .8f, .8f, 0.f};
+//    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, amDiffuse);
+    
     for(int z = 0; z < terrain.height-1; z++){
         for(int x = 0; x < terrain.width-1; x++){
         
@@ -248,6 +284,7 @@ void cb_display() {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
+//    glDisable(GL_LIGHTING);
     glEnable(GL_COLOR_MATERIAL);
     glShadeModel(GL_SMOOTH);
     
@@ -259,9 +296,10 @@ void cb_display() {
     glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
 
-    gluLookAt(200,200,200,
+    gluLookAt(500,500,500,
               0,0,0,
               0,1,0);
+    
     
     
     
@@ -276,7 +314,10 @@ void cb_display() {
     else{
         drawTerrain();
     }
+//    float lightP2[4] = {0,0,0,0};
+//    glLightfv(GL_LIGHT0, GL_POSITION, lightP2);
     glLightfv(GL_LIGHT0, GL_POSITION, lightP);
+    
     glPopMatrix();
 
     
@@ -393,6 +434,7 @@ void callback_keyboard(unsigned char key, int x, int y) {
         xposition -= float(sin(yRotationrad));
         yposition += float(sin(xRotationrad));
         zposition += float(cos(yRotationrad));
+        printf("x: %f, y: %f, z: %f \n",xposition,yposition,zposition);
     }
     
     if(key == 'd')
@@ -413,21 +455,23 @@ void callback_keyboard(unsigned char key, int x, int y) {
     if (key =='S') spin();
     
     if( key =='i'){
-        lightX += 20;
+        lightX += 50;
         printf("Moved Light Down\n");
+        printf("lightX: %f, lightY:%f, LightZ:%f \n",lightX,lightY,lightZ);
+        
     }
     if( key =='k'){
-        lightX -= 20;
+        lightX -= 50;
         
         printf("Moved Light Up \n");
     }
     if( key =='j'){
-        lightZ += 20;
+        lightZ += 50;
         
         printf("Moved Light Right\n");
     }
     if( key =='l'){
-        lightZ -= 20;
+        lightZ -= 50;
         printf("Moved Light Left\n");
     }
     
