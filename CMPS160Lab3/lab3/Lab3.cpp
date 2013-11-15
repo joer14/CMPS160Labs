@@ -24,16 +24,24 @@ bool textureOn = true;
 canvas_t terrain;
 canvas_t skin;
 GLuint texture;
-
+bool fNorms = true;
 float farPlane, nearPlane;
 
-
+float** fNormals;
 float ambientC[3];
 float lightX=0;
 float lightY=-500;
 float lightZ=0;
 float lightP[4];
 //float lightP[4]={lightX,lightY,lightZ,1.0};
+
+float lightPosition[4] = {1, 1, 5, 1};
+float diffuseColour[3] = {.5,.5,1};
+float ambientColour[3] = {0.1,0.1,0.1};
+float specularColour[4] = {0, 0, 0, 1};
+//
+//the functions I used for my lights are
+
 
 
 //GLuint texture;
@@ -118,12 +126,25 @@ void compute_normal(float *result, int x, int z, bool upper) {
     if (z-5 == terrain.height) return;
     if (x+5 > terrain.width) return;
     if (z+5 > terrain.height) return;
+    //e1 = v2-v1
+    //e2 = v3-v1
+    //e3 = v3-v2
+    //e4 = v4-v2
+    //e5 = v2-v4
+    //e6 = v3-v4
+    //    float v1[3]= {(float)x,float(RED(PIXEL(terrain, x, z))), (float)z};
+    //    float v2[3]= {(float)x,float(RED(PIXEL(terrain, x, z+1))), (float)z+1};
+    //    float v3[3]= {(float)x+1,float(RED(PIXEL(terrain, x+1, z))), (float)z};
+    //    float v4[3]= {(float)x+1, float(RED(PIXEL(terrain, x+1, z+1))), (float)z+1};
+    //
     
     float e1[3] = {1.0f,float(RED(PIXEL(terrain, x, z+1)))-float(RED(PIXEL(terrain, x, z))),0.0f};
     float e2[3] = {0.0f,float(RED(PIXEL(terrain, x+1, z)))-float(RED(PIXEL(terrain, x, z))),1.0f};
+//    float e3[3] = {1.0f,float(RED(PIXEL(terrain, x+1, z)))-float(RED(PIXEL(terrain, x, z+1))),1.0f};
+//    float e4[3] = {1.0f,float(RED(PIXEL(terrain, x+1, z+1)))- float(RED(PIXEL(terrain, x, z+1))), 0.0f};
     float e3[3] = {-1.0f,float(RED(PIXEL(terrain, x+1, z)))-   float(RED(PIXEL(terrain, x, z+1))),1.0f};
     float e4[3] = {0.0f,float(RED(PIXEL(terrain, x+1, z+1)))- float(RED(PIXEL(terrain, x, z+1))), 1.0f};
-   
+//    float e5[3] = {
 //    cross.x = e1.y*e2.z - e1.z*e2.y
 //    cross.y = e1.z*e2.x - e1.x*e2.z
 //    cross.z = e1.x*e2.y - e1.y*e2.x
@@ -135,7 +156,9 @@ void compute_normal(float *result, int x, int z, bool upper) {
         result[0] = e1[1]*e2[2]-e1[2]*e2[1];
         result[1] = e1[2]*e2[0]-e1[0]*e2[2];
         result[2] = e1[0]*e2[1]-e1[1]*e2[0];
-        
+//        printf("Upper: x: %f y: %f z:%f \n",result[0],result[1],result[2]);
+//        normalize(result,result);
+//        printf("Upper: x: %f y: %f z:%f \n",result[0],result[1],result[2]);
         return;
     }else{
         result[0] = e3[1]*e4[2]-e3[2]*e4[1];
@@ -144,16 +167,15 @@ void compute_normal(float *result, int x, int z, bool upper) {
         result[0] = -result[0];
         result[1] = -result[1];
         result[2] = -result[2];
+//        normalize(result,result);
+//        printf("Lower: x: %f y: %f z:%f \n",result[0],result[1],result[2]);
+        
         return;
     }
     
 //////    printf("z: %d x: %d\n",z, x);
 ////  
-//    float v1[3]= {(float)x,float(RED(PIXEL(terrain, x, z))), (float)z};
-//    float v2[3]= {(float)x,float(RED(PIXEL(terrain, x, z+1))), (float)z+1};
-//    float v3[3]= {(float)x+1,float(RED(PIXEL(terrain, x+1, z))), (float)z};
-//    float v4[3]= {(float)x+1, float(RED(PIXEL(terrain, x+1, z+1))), (float)z+1};
-//    
+
 //    //float(RED(PIXEL(terrain, x, z)))
 //    float e1[3];
 //    float e2[3];
@@ -182,6 +204,72 @@ void spin() {
 	}
 }
 
+void genNormals(){
+    float the_normal[3];//
+    
+//    fNormals = new float*[terrain.height][terrain.width][2];
+    for(int i = 0; i < terrain.height; i++)
+    {
+        fNormals[i] = new float[terrain.width];
+    }
+    
+    float upper[terrain.height][terrain.width];
+    
+    
+//    int n,m;
+//    for (n=0;n<terrain.height-1;n++)
+//        for (m=0;m<terrain.width-1;m++)
+//        {
+//            jimmy[n][m][0]=
+//            
+//        }
+//
+//    
+//    for(int z = 0; z < terrain.height-1; z++){
+//        for(int x = 0; x < terrain.width-1; x++){
+//            compute_normal(the_normal, x, z, true);
+//            upper[x][z][1]=the_normal;
+//            compute_normal(the_normal, x, z, false);
+//            jimmy[x][z][0]=the_normal;
+//            }
+//    }
+    
+}
+
+void compute_Vnormal(float *result, int x, int z, bool upper) {
+    //bad boundry cases, should be cleaned up
+    if (x-5 == terrain.width) return;
+    if (z-5 == terrain.height) return;
+    if (x+5 > terrain.width) return;
+    if (z+5 > terrain.height) return;
+//    return result;
+//    x,z+1	TRUE
+//    x+1,z+1	TRUE
+//    x+1,x	TRUE
+//    x,z+1	FALSE
+//    x+1,z+1	FALSE
+//    x+1,x	FALSE
+    float n1[3];
+    float n2[3];
+    float n3[3];
+    float n4[3];
+    float n5[3];
+    float n6[3];
+    
+    compute_normal(n1, x, z+1, true);
+    compute_normal(n2, x+1, z+1, true);
+    compute_normal(n3, z+1, z, true);
+    compute_normal(n4, x, z+1, false);
+    compute_normal(n5, x+1, z+1, false);
+    compute_normal(n6, z+1, z, false);
+    
+    result[0]=(n1[0]+n2[0]+n3[0]+n4[0]+n5[0]+n6[0])/ 6.0;
+    result[1]=(n1[1]+n2[1]+n3[1]+n4[1]+n5[1]+n6[1])/ 6.0;
+    result[2]=(n1[2]+n2[2]+n3[2]+n4[2]+n5[2]+n6[2])/ 6.0;
+    
+    
+    
+}
 void drawTerrain(){
     
     lightP[0] = lightX;
@@ -200,43 +288,87 @@ void drawTerrain(){
     
     glEnable(GL_NORMALIZE);
     glBegin(GL_TRIANGLES);
-//    GLfloat amDiffuse[] = {0.f, .8f, .8f, 0.f};
-//    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, amDiffuse);
+    GLfloat amDiffuse[] = {0.f, .8f, .8f, 0.f};
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, amDiffuse);
     
     for(int z = 0; z < terrain.height-1; z++){
         for(int x = 0; x < terrain.width-1; x++){
-        
-            //upper
-            if(textureOn){
-                compute_normal(the_normal, x, z, true);
-                glNormal3f(the_normal[0], the_normal[1], the_normal[2]);
+            if(fNorms){
+                //upper
+                if(textureOn){
+                    compute_normal(the_normal, x, z, true);
+                    glNormal3f(the_normal[0], the_normal[1], the_normal[2]);
+                    
+                    //x, y, z
+                    glTexCoord2f((float)(x) / terrain.width, (float)(z) / terrain.height);
+                }
+                glVertex3f(x, float(RED(PIXEL(terrain, x, z))), z);
+                //x,y,z+1
+                if(textureOn){ glTexCoord2f((float)(x) / terrain.width, (float)(z+1) / terrain.height);}
+                glVertex3f(x,float(RED(PIXEL(terrain, x, z+1))), z+1 );
+                //x+1,y,z
+                if(textureOn){ glTexCoord2f((float)(x+1) / terrain.width, (float)(z) / terrain.height);}
+                glVertex3f(x+1, float(RED(PIXEL(terrain, x+1, z))),z );
+
+                
+                //lower
+                if(textureOn){
+                        compute_normal(the_normal, x, z, false);
+                    glNormal3f(the_normal[0], the_normal[1], the_normal[2]);
+                }
+                //x,y,z+1
+                if(textureOn){glTexCoord2f((float)(x) / terrain.width, (float)(z+1) / terrain.height);}
+                glVertex3f(x, float(RED(PIXEL(terrain, x, z+1))), z+1);
+                //x+1,y,z
+                if(textureOn){glTexCoord2f((float)(x+1) / terrain.width, (float)(z) / terrain.height);}
+                glVertex3f(x+1, float(RED(PIXEL(terrain, x+1, z))), z);
+                //x+1, y+1, z+1
+                if(textureOn){glTexCoord2f((float)(x+1) / terrain.width, (float)(z+1) / terrain.height);}
+                glVertex3f(x+1, float(RED(PIXEL(terrain, x+1, z+1))), z+1);
+            }
+            else{
+                //caluate using fNormals 
+                //upper
                 
                 //x, y, z
-                glTexCoord2f((float)(x) / terrain.width, (float)(z) / terrain.height);
-            }
-            glVertex3f(x, float(RED(PIXEL(terrain, x, z))), z);
-            //x,y,z+1
-            if(textureOn){ glTexCoord2f((float)(x) / terrain.width, (float)(z+1) / terrain.height);}
-            glVertex3f(x,float(RED(PIXEL(terrain, x, z+1))), z+1 );
-            //x+1,y,z
-            if(textureOn){ glTexCoord2f((float)(x+1) / terrain.width, (float)(z) / terrain.height);}
-            glVertex3f(x+1, float(RED(PIXEL(terrain, x+1, z))),z );
-
-            
-            //lower
-            if(textureOn){
-                    compute_normal(the_normal, x, z, false);
+                compute_Vnormal(the_normal, x, z, true);
                 glNormal3f(the_normal[0], the_normal[1], the_normal[2]);
+                if(textureOn){glTexCoord2f((float)(x) / terrain.width, (float)(z) / terrain.height);}
+                glVertex3f(x, float(RED(PIXEL(terrain, x, z))), z);
+                
+                //x,y,z+1
+                compute_Vnormal(the_normal, x, z+1, true);
+                glNormal3f(the_normal[0], the_normal[1], the_normal[2]);
+                if(textureOn){ glTexCoord2f((float)(x) / terrain.width, (float)(z+1) / terrain.height);}
+                glVertex3f(x,float(RED(PIXEL(terrain, x, z+1))), z+1 );
+                
+                //x+1,y,z
+                compute_Vnormal(the_normal, x+1, z, true);
+                glNormal3f(the_normal[0], the_normal[1], the_normal[2]);
+                if(textureOn){ glTexCoord2f((float)(x+1) / terrain.width, (float)(z) / terrain.height);}
+                glVertex3f(x+1, float(RED(PIXEL(terrain, x+1, z))),z );
+                
+                //x,y,z+1
+                compute_Vnormal(the_normal, x, z+1, false);
+                glNormal3f(the_normal[0], the_normal[1], the_normal[2]);
+                if(textureOn){glTexCoord2f((float)(x) / terrain.width, (float)(z+1) / terrain.height);}
+                glVertex3f(x, float(RED(PIXEL(terrain, x, z+1))), z+1);
+                
+                //x+1,y,z
+                compute_Vnormal(the_normal, x+1, z, false);
+                glNormal3f(the_normal[0], the_normal[1], the_normal[2]);
+                if(textureOn){glTexCoord2f((float)(x+1) / terrain.width, (float)(z) / terrain.height);}
+                glVertex3f(x+1, float(RED(PIXEL(terrain, x+1, z))), z);
+                
+                //x+1, y+1, z+1
+                compute_Vnormal(the_normal, x+1, z+1, false);
+                glNormal3f(the_normal[0], the_normal[1], the_normal[2]);
+                if(textureOn){glTexCoord2f((float)(x+1) / terrain.width, (float)(z+1) / terrain.height);}
+                glVertex3f(x+1, float(RED(PIXEL(terrain, x+1, z+1))), z+1);
+                
+                
+                
             }
-            //x,y,z+1
-            if(textureOn){glTexCoord2f((float)(x) / terrain.width, (float)(z+1) / terrain.height);}
-            glVertex3f(x, float(RED(PIXEL(terrain, x, z+1))), z+1);
-            //x+1,y,z
-            if(textureOn){glTexCoord2f((float)(x+1) / terrain.width, (float)(z) / terrain.height);}
-            glVertex3f(x+1, float(RED(PIXEL(terrain, x+1, z))), z);
-            //x+1, y+1, z+1
-            if(textureOn){glTexCoord2f((float)(x+1) / terrain.width, (float)(z+1) / terrain.height);}
-            glVertex3f(x+1, float(RED(PIXEL(terrain, x+1, z+1))), z+1);
         }
     }
     
@@ -289,6 +421,8 @@ void cb_display() {
     glShadeModel(GL_SMOOTH);
     
     
+    
+    
     glPushMatrix();
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -296,7 +430,7 @@ void cb_display() {
     glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
 
-    gluLookAt(500,300,500,
+    gluLookAt(350,200,350,
               0,0,0,
               0,1,0);
     
@@ -316,7 +450,15 @@ void cb_display() {
     }
 //    float lightP2[4] = {0,0,0,0};
 //    glLightfv(GL_LIGHT0, GL_POSITION, lightP2);
+//    glLightfv(GL_LIGHT0, GL_POSITION, lightP);
+    
+    
     glLightfv(GL_LIGHT0, GL_POSITION, lightP);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseColour);
+    glLightfv(GL_LIGHT0, GL_AMBIENT, ambientColour);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, specularColour);
+
+    
     
     glPopMatrix();
 
@@ -390,6 +532,7 @@ void callback_keyboard(unsigned char key, int x, int y) {
             //            eraser();
             break;
     }
+    if (key == 'f') fNorms = !fNorms;
     if(key == 'n')
         nearPlane -= 100;
     if(key == 'N')
@@ -404,7 +547,9 @@ void callback_keyboard(unsigned char key, int x, int y) {
     if(farPlane < 0)
         farPlane = 1000;
     
-    
+    if (key == 'b'){
+        dListOn = !dListOn;
+    }
     if(key == 'c')
     {
         xRotation += 1;
@@ -484,7 +629,7 @@ int main(int argc, char** argv) {
 	glutInit(&argc, argv);
     
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-	glutInitWindowSize(500, 500);
+	glutInitWindowSize(800, 800);
     //    glutInitWindowPosition(600, 120);
     //    glutInitWindowSize(1000, 1000);
 	glutCreateWindow("Lab 3: Terrain Mapping");
@@ -509,12 +654,13 @@ int main(int argc, char** argv) {
            "Controls:\n\n"
            "c/v to rotate up/down \n"
            "WASD to move around the terrain\n"
-           "n/N to decrease/increase near plane distance\n "
-           "m/M to decrease/increase far plane distance\n "
-           "i/k to move the light up/down\n "
+           "n/N to decrease/increase near plane distance\n"
+           "m/M to decrease/increase far plane distance\n"
+           "i/k to move the light up/down\n"
            "j/l to move the light left/right\n"
            "S to spin\n"
-           "F switch from Face normals to vertex normals\n"
+           "f switch from Face normals to vertex normals\n"
+           "b switch on/off display mode(on by default)\n"
            "q to quit\n"
            );
 	//terrain->drawTerrain();
@@ -531,7 +677,7 @@ int main(int argc, char** argv) {
 //    ambientC[2] = .4;
 //    
     glDepthFunc(GL_LEQUAL);
-    glEnable(GL_NORMALIZE);
+//    glEnable(GL_NORMALIZE);
     newDList();
     
 //    createTerrainDisplayList();
