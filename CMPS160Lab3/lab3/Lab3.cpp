@@ -296,7 +296,7 @@ void cb_display() {
     glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
 
-    gluLookAt(500,500,500,
+    gluLookAt(500,300,500,
               0,0,0,
               0,1,0);
     
