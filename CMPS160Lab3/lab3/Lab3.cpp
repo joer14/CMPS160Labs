@@ -20,6 +20,7 @@ int windowWidth, windowHeight;
 float spinAngle = 0;
 bool is_spinning = false;
 bool dListOn= true;
+bool textureOn = true;
 canvas_t terrain;
 canvas_t skin;
 GLuint texture;
@@ -152,48 +153,13 @@ void spin() {
 		is_spinning = true;
 	}
 }
-void DebugTerrain(){
-    
-    float the_normal[3];//
-    
-    for(int z = 0; z < terrain.height-1; z++){
-        for(int x = 0; x < terrain.width-1; x++){
-            
-            //upper
-            compute_normal(the_normal, x, z, true);
-            glNormal3f(the_normal[0], the_normal[1], the_normal[2]);
-            
-            //x, y, z
-            glTexCoord2f((float)(x) / terrain.width, (float)(z) / terrain.height);
-            glVertex3f(x, float(RED(PIXEL(terrain, x, z))), z);
-            //x,y,z+1
-            glTexCoord2f((float)(x) / terrain.width, (float)(z+1) / terrain.height);
-            glVertex3f(x,float(RED(PIXEL(terrain, x, z+1))), z+1 );
-            //x+1,y,z
-            glTexCoord2f((float)(x+1) / terrain.width, (float)(z) / terrain.height);
-            glVertex3f(x+1, float(RED(PIXEL(terrain, x+1, z))),z );
-            
-            
-            //lower
-            compute_normal(the_normal, x, z, false);
-            glNormal3f(the_normal[0], the_normal[1], the_normal[2]);
-            //x,y,z+1
-            glTexCoord2f((float)(x) / terrain.width, (float)(z+1) / terrain.height);
-            glVertex3f(x, float(RED(PIXEL(terrain, x, z+1))), z+1);
-            //x+1,y,z
-            glTexCoord2f((float)(x+1) / terrain.width, (float)(z) / terrain.height);
-            glVertex3f(x+1, float(RED(PIXEL(terrain, x+1, z))), z);
-            //x+1, y+1, z+1
-            glTexCoord2f((float)(x+1) / terrain.width, (float)(z+1) / terrain.height);
-            glVertex3f(x+1, float(RED(PIXEL(terrain, x+1, z+1))), z+1);
-        }
-    }
-    
-}
+
 void drawTerrain(){
     
+    if(textureOn){
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, texture);
+    }
 //    //for maping the texture on
 //    glTranslatef(-(float)(terrain.width - 1) / 2, 0, -(float)(terrain.height -1) / 2);
 
@@ -205,38 +171,42 @@ void drawTerrain(){
         for(int x = 0; x < terrain.width-1; x++){
         
             //upper
-            compute_normal(the_normal, x, z, true);
-            glNormal3f(the_normal[0], the_normal[1], the_normal[2]);
-
-            //x, y, z
-            glTexCoord2f((float)(x) / terrain.width, (float)(z) / terrain.height);
+            if(textureOn){
+                compute_normal(the_normal, x, z, true);
+                glNormal3f(the_normal[0], the_normal[1], the_normal[2]);
+                
+                //x, y, z
+                glTexCoord2f((float)(x) / terrain.width, (float)(z) / terrain.height);
+            }
             glVertex3f(x, float(RED(PIXEL(terrain, x, z))), z);
             //x,y,z+1
-            glTexCoord2f((float)(x) / terrain.width, (float)(z+1) / terrain.height);
+            if(textureOn){ glTexCoord2f((float)(x) / terrain.width, (float)(z+1) / terrain.height);}
             glVertex3f(x,float(RED(PIXEL(terrain, x, z+1))), z+1 );
             //x+1,y,z
-            glTexCoord2f((float)(x+1) / terrain.width, (float)(z) / terrain.height);
+            if(textureOn){ glTexCoord2f((float)(x+1) / terrain.width, (float)(z) / terrain.height);}
             glVertex3f(x+1, float(RED(PIXEL(terrain, x+1, z))),z );
 
             
             //lower
-            compute_normal(the_normal, x, z, false);
-            glNormal3f(the_normal[0], the_normal[1], the_normal[2]);
+            if(textureOn){
+                    compute_normal(the_normal, x, z, false);
+                glNormal3f(the_normal[0], the_normal[1], the_normal[2]);
+            }
             //x,y,z+1
-            glTexCoord2f((float)(x) / terrain.width, (float)(z+1) / terrain.height);
+            if(textureOn){glTexCoord2f((float)(x) / terrain.width, (float)(z+1) / terrain.height);}
             glVertex3f(x, float(RED(PIXEL(terrain, x, z+1))), z+1);
             //x+1,y,z
-            glTexCoord2f((float)(x+1) / terrain.width, (float)(z) / terrain.height);
+            if(textureOn){glTexCoord2f((float)(x+1) / terrain.width, (float)(z) / terrain.height);}
             glVertex3f(x+1, float(RED(PIXEL(terrain, x+1, z))), z);
             //x+1, y+1, z+1
-            glTexCoord2f((float)(x+1) / terrain.width, (float)(z+1) / terrain.height);
+            if(textureOn){glTexCoord2f((float)(x+1) / terrain.width, (float)(z+1) / terrain.height);}
             glVertex3f(x+1, float(RED(PIXEL(terrain, x+1, z+1))), z+1);
         }
     }
     
     glEnd();
     
-    glDisable(GL_TEXTURE_2D);
+    if(textureOn){glDisable(GL_TEXTURE_2D);}
 //    printf("Created Triangle Strip\n");
 
     
