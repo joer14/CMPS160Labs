@@ -58,12 +58,14 @@ float specularColour[4] = {0, 0, 0, 1};
 struct animalSt{
     int x;
     int y;
+    int id;
     float animalMoveX =0.0f;
     float animalMoveY =0.0f;
     float animalMoveZ =0.0f;
     float animalForwardAngle =0.0f;
     float animalMoveT =0.0f;
 };
+typedef struct animalSt animal;
  animalSt an1,an2,an3;
 //
 //
@@ -76,7 +78,7 @@ struct animalSt{
 //struct Y y = { .r = 1, .s = 2, .t = 3 };
 
 
-float animalMoveT =0.0f;
+//float animalMoveT =0.0f;
 
 //GLuint texture;
 GLuint theList;
@@ -856,65 +858,99 @@ void newDList(){
 //    
 //}
 //
-//void update2(struct animalSt);
+//void update2(struct animal);
 
-void update2(animalSt an){
+void update2(animal *an){
 //    t = t+.01;
-    int x= an.x;
-    int y= an.y;
-    if(an.animalMoveT>360) an.animalMoveT=0;
+    int x= (an->x);
+    int y= an->y;
+    if(an->animalMoveT>360) an->animalMoveT=0;
     
-    an.animalMoveT += 0.1f;
-    an.animalMoveT= animalMoveT;
     
-    float dx = an.animalMoveX - (x +cos(an.animalMoveT)*50);
-    float dz = an.animalMoveZ - (y +sin(an.animalMoveT)*50);
-    
-    an.animalMoveX = x +cos(an.animalMoveT)*50;
-    an.animalMoveZ = y +sin(an.animalMoveT)*50;
-    
-    //height map
-    //call bilinear inter here
-    an.animalMoveY = float(RED(PIXEL(terrain, (int)an.animalMoveX, (int)an.animalMoveZ)));
-    
-    an.animalForwardAngle = atan2 (dx,dz) * 180 / PI;;
-    an.animalForwardAngle += 90.0f;
+    if (an->id == 1){
+        an->animalMoveT += 0.01f;
+//        an->animalMoveT= animalMoveT;
+        
+        float dx = an->animalMoveX - (x +cos(an->animalMoveT)*50);
+        float dz = an->animalMoveZ - (y +sin(an->animalMoveT)*50);
+        an->animalMoveX = x +cos(an->animalMoveT)*50;
+        an->animalMoveZ = y +sin(an->animalMoveT)*50;
+        //height map
+        //call bilinear inter here
+        an->animalMoveY = float(RED(PIXEL(terrain, (int)an->animalMoveX, (int)an->animalMoveZ)));
+        an->animalForwardAngle = atan2 (dx,dz) * 180 / PI;;
+        an->animalForwardAngle += 90.0f;
+    }
+    if (an->id == 2){
+        an->animalMoveT += 0.01f;
+//        an->animalMoveT= animalMoveT;
+        
+        float dx = an->animalMoveX - (x +sin(an->animalMoveT)*50);
+        float dz = an->animalMoveZ - (y +cos(an->animalMoveT)*50);
+        an->animalMoveX = x +sin(an->animalMoveT)*50;
+        an->animalMoveZ = y +cos(an->animalMoveT)*50;
+        //height map
+        //call bilinear inter here
+        an->animalMoveY = float(RED(PIXEL(terrain, (int)an->animalMoveX, (int)an->animalMoveZ)));
+        an->animalForwardAngle = atan2 (dx,dz) * 180 / PI;;
+        an->animalForwardAngle += 90.0f;
+    }
+    if (an->id == 3){
+        an->animalMoveT += 0.02f;
+//        an->animalMoveT= animalMoveT;
+        
+        float dx = an->animalMoveX - (x +sin(an->animalMoveT)*30);
+        float dz = an->animalMoveZ - (y +cos(an->animalMoveT)*50);
+        an->animalMoveX = x + sin(an->animalMoveT)*30;
+        an->animalMoveZ = y + cos(an->animalMoveT)*50;
+        //height map
+        //call bilinear inter here
+        an->animalMoveY = float(RED(PIXEL(terrain, (int)an->animalMoveX, (int)an->animalMoveZ)));
+        an->animalForwardAngle = atan2 (dx,dz) * 180 / PI;;
+        an->animalForwardAngle += 90.0f;
+    }
 //    printf("forward ang: %f \n",an.animalForwardAngle);
-//    printf("time: %f\n",an.animalMoveT);
-    printf("X: %f\n",an.animalMoveX);
+    printf("time: %f\n",an->animalMoveT);
+//    printf("X: %f\n",an->animalMoveX);
 //    prinft(")
 }
 void animalMove(){
-    an1.x = an1.y = an2.x = 128;
-    an2.y = 0;
-    if(animalMoveT>360) animalMoveT=0;
-    animalMoveT += 0.1f;
-    //animals at
-    // 128,128,
-    // 
-    //
-    // /
-    //
-//    animalSt.x = 22;
-//    an
-    //
+//    if(animalMoveT>360) animalMoveT=0;
+//    animalMoveT += 0.01f;
+
+    an1.id = 1;
+    an2.id = 2;
+    an3.id = 3;
+    an1.x = an1.y = 128;
+    an2.x = 64;
+    an2.y = 128;
+    an3.x = 128;
+    an3.y = 64;
+    
+    
+    update2(&an1);
+    update2(&an2);
+    update2(&an3);
     glPushMatrix();
-//    updateAnimalMove();
-//    update2(128,128);
-    update2(an1);
-    printf("An1 X: %f\n",an1.animalMoveX);
-//    glTranslatef(128,0,128);
     glTranslatef(an1.animalMoveX,an1.animalMoveY,an1.animalMoveZ);
     glRotatef(an1.animalForwardAngle,0.0f,1.0f,0.0f);
     animalTime();
     glPopMatrix();
     
-//    glPushMatrix();
-//    update2(an2);
-//    glTranslatef(an2.animalMoveX,an2.animalMoveY,an2.animalMoveZ);
-//    glRotatef(an2.animalForwardAngle,0.0f,1.0f,0.0f);
-//    animalTime();    
-//    glPopMatrix();
+    glPushMatrix();
+    glTranslatef(an2.animalMoveX,an2.animalMoveY,an2.animalMoveZ);
+    glRotatef(an2.animalForwardAngle,0.0f,1.0f,0.0f);
+    animalTime();
+    glPopMatrix();
+    
+    glPushMatrix();
+    glTranslatef(an3.animalMoveX,an3.animalMoveY,an3.animalMoveZ);
+    glRotatef(an3.animalForwardAngle,0.0f,1.0f,0.0f);
+    animalTime();
+    glPopMatrix();
+
+    //    printf("An1 X: %f\n",an1.animalMoveX);
+
 }
 
 void cb_display() {
@@ -957,6 +993,16 @@ void cb_display() {
     if(look == 2){
         gluLookAt(an2.animalMoveX - 20,an2.animalMoveY + 50 ,an2.animalMoveZ - 20,
                   an2.animalMoveX,an2.animalMoveY,an2.animalMoveZ,
+                  0,1,0);
+    }
+    if(look == 3){
+        gluLookAt(an3.animalMoveX - 20,an3.animalMoveY + 50 ,an3.animalMoveZ - 20,
+                  an3.animalMoveX,an3.animalMoveY,an3.animalMoveZ,
+                  0,1,0);
+    }
+    if(look == 4){
+        gluLookAt(10,300,10,
+                  128,0,128,
                   0,1,0);
     }
    glPushMatrix();
@@ -1034,7 +1080,9 @@ void cb_display() {
    glPopMatrix();
    
    draw_axis(4.0);
+    if (animate){
     animalMove();
+    }
     drawTerrain();//
 //    drawTexture();
     
@@ -1109,6 +1157,9 @@ void cb_keyboard(unsigned char key, int x, int y) {
 //    printf("keyboard callback \n");
     if (key == '1') look = 1;
     if (key == '0') look = 0;
+    if (key == '2') look = 2;
+    if (key == '3') look = 3;
+    if (key == '4') look = 4;
    if (key == 'b'){
        dListOn = !dListOn;
    }
