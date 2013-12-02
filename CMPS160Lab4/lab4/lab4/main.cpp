@@ -53,12 +53,35 @@ float specularColour[4] = {0, 0, 0, 1};
 //
 //the functions I used for my lights are
 
+// struct animalSt animalSt;
 
+struct animalSt{
+    int x;
+    int y;
+    float animalMoveX =0.0f;
+    float animalMoveY =0.0f;
+    float animalMoveZ =0.0f;
+    float animalForwardAngle =0.0f;
+    float animalMoveT =0.0f;
+};
+ animalSt an1,an2,an3;
+//
+//
+//struct Y {
+//    int r;
+//    int s;
+//    int t;
+//};
+//
+//struct Y y = { .r = 1, .s = 2, .t = 3 };
+
+
+float animalMoveT =0.0f;
 
 //GLuint texture;
 GLuint theList;
 
-
+static int look=0;
 // Global variables
 float angle = 0;
 float armA = 0;
@@ -459,7 +482,8 @@ void animateArm(){
 void animalTime(){
     glPushMatrix();
     glScalef(2.0f,2.0f,2.0f);
-    glTranslated(100,30,100);
+    glTranslatef(0,2.5f,0);
+//    glTranslatef(terrain.width/2,2.5f,terrain.height/2);
     glPushMatrix();
     glTranslatef(0,.3,-.5);
     glScalef(1,1.5,.5);
@@ -497,12 +521,7 @@ void drawTexture() {
  
  glEnable(GL_TEXTURE_2D);
  glBindTexture(GL_TEXTURE_2D, texture);
-   //    gluLookAt
-   //    (1,0,0,
-   //     1,0,0,
-   //     0,1,0);
    
-   //    gluLookAt(0,0,15,0,0,0,0,1,0);
  glBegin(GL_QUADS);
    glTexCoord2f(0.0f,0.0f);
    glNormal3f(0,0.0,1.0);
@@ -833,7 +852,70 @@ void newDList(){
 //     glFlush();
 //     glutSwapBuffers(); // for smoother animation
 // }
+//void updateAnimalMove(float *animalMoveX,float *animalMoveY, float *animalMoveZ){
+//    
+//}
+//
+//void update2(struct animalSt);
 
+void update2(animalSt an){
+//    t = t+.01;
+    int x= an.x;
+    int y= an.y;
+    if(an.animalMoveT>360) an.animalMoveT=0;
+    
+    an.animalMoveT += 0.1f;
+    an.animalMoveT= animalMoveT;
+    
+    float dx = an.animalMoveX - (x +cos(an.animalMoveT)*50);
+    float dz = an.animalMoveZ - (y +sin(an.animalMoveT)*50);
+    
+    an.animalMoveX = x +cos(an.animalMoveT)*50;
+    an.animalMoveZ = y +sin(an.animalMoveT)*50;
+    
+    //height map
+    //call bilinear inter here
+    an.animalMoveY = float(RED(PIXEL(terrain, (int)an.animalMoveX, (int)an.animalMoveZ)));
+    
+    an.animalForwardAngle = atan2 (dx,dz) * 180 / PI;;
+    an.animalForwardAngle += 90.0f;
+//    printf("forward ang: %f \n",an.animalForwardAngle);
+//    printf("time: %f\n",an.animalMoveT);
+    printf("X: %f\n",an.animalMoveX);
+//    prinft(")
+}
+void animalMove(){
+    an1.x = an1.y = an2.x = 128;
+    an2.y = 0;
+    if(animalMoveT>360) animalMoveT=0;
+    animalMoveT += 0.1f;
+    //animals at
+    // 128,128,
+    // 
+    //
+    // /
+    //
+//    animalSt.x = 22;
+//    an
+    //
+    glPushMatrix();
+//    updateAnimalMove();
+//    update2(128,128);
+    update2(an1);
+    printf("An1 X: %f\n",an1.animalMoveX);
+//    glTranslatef(128,0,128);
+    glTranslatef(an1.animalMoveX,an1.animalMoveY,an1.animalMoveZ);
+    glRotatef(an1.animalForwardAngle,0.0f,1.0f,0.0f);
+    animalTime();
+    glPopMatrix();
+    
+//    glPushMatrix();
+//    update2(an2);
+//    glTranslatef(an2.animalMoveX,an2.animalMoveY,an2.animalMoveZ);
+//    glRotatef(an2.animalForwardAngle,0.0f,1.0f,0.0f);
+//    animalTime();    
+//    glPopMatrix();
+}
 
 void cb_display() {
  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -862,11 +944,21 @@ void cb_display() {
    glMatrixMode(GL_MODELVIEW);
    glPopMatrix();
    
-   gluLookAt(300,250,300,
+    if(look == 0){
+    gluLookAt(-50,100,-50,
              0,0,0,
              0,1,0);
-   
-   
+    }
+    if(look == 1){
+        gluLookAt(an1.animalMoveX - 20,an1.animalMoveY + 50 ,an1.animalMoveZ - 20,
+                  an1.animalMoveX,an1.animalMoveY,an1.animalMoveZ,
+                  0,1,0);
+    }
+    if(look == 2){
+        gluLookAt(an2.animalMoveX - 20,an2.animalMoveY + 50 ,an2.animalMoveZ - 20,
+                  an2.animalMoveX,an2.animalMoveY,an2.animalMoveZ,
+                  0,1,0);
+    }
    glPushMatrix();
    
    //if we should use the displaylist then use that,
@@ -942,8 +1034,7 @@ void cb_display() {
    glPopMatrix();
    
    draw_axis(4.0);
-    
-    animalTime();
+    animalMove();
     drawTerrain();//
 //    drawTexture();
     
@@ -1015,7 +1106,9 @@ void cb_keyboard(unsigned char key, int x, int y) {
     //         break;
 
         //    switch(key) {
-    printf("keyboard callback \n");
+//    printf("keyboard callback \n");
+    if (key == '1') look = 1;
+    if (key == '0') look = 0;
    if (key == 'b'){
        dListOn = !dListOn;
    }
