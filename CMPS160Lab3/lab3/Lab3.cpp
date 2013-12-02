@@ -1,6 +1,8 @@
 
 // Lab3.cpp : Terrain Mapping
-//
+// Joe Rowley CMPS160 Fall 2013
+// jrowley@ucsc.edu
+// this code is UGLY
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -35,8 +37,8 @@ float lightZ=0;
 float lightP[4];
 //float lightP[4]={lightX,lightY,lightZ,1.0};
 
-float lightPosition[4] = {1, 1, 5, 1};
-float diffuseColour[3] = {.5,.5,1};
+//float lightPosition[4] = {1, 1, 5, 1};
+float diffuseColour[3] = {1,.83,.66};
 float ambientColour[3] = {0.1,0.1,0.1};
 float specularColour[4] = {0, 0, 0, 1};
 //
@@ -256,13 +258,51 @@ void compute_Vnormal(float *result, int x, int z, bool upper) {
     float n5[3];
     float n6[3];
     
-    compute_normal(n1, x, z+1, true);
-    compute_normal(n2, x+1, z+1, true);
-    compute_normal(n3, z+1, z, true);
-    compute_normal(n4, x, z+1, false);
-    compute_normal(n5, x+1, z+1, false);
-    compute_normal(n6, z+1, z, false);
+//    compute_normal(n1, x, z+1, true);
+//    compute_normal(n2, x+1, z+1, true);
+//    compute_normal(n3, x+1, z, true);
+//    compute_normal(n4, x, z+1, false);
+//    compute_normal(n5, x+1, z+1, false);
+//    compute_normal(n6, x+1, z, false);
+   
+//    compute_normal(n1, x, z+1, true);
+//    compute_normal(n2, x+1, z+1, true);
+//    compute_normal(n3, x+1, z, true);
+//    compute_normal(n4, x, z-1, true);
+//    compute_normal(n5, x-1, z-1, true);
+//    compute_normal(n6, x-1, z, true);
     
+//    -x,z	TRUE
+//    -x, -z 	TRUE
+//    x,z-1	treu
+//    x,z+1
+//    x+1,z+1
+//    x+1,x
+    
+    compute_normal(n1, x, z, true);
+    compute_normal(n2, x+1, z, true);
+    compute_normal(n3, x, z+1, true);
+    compute_normal(n4, x+1, z+1, false);
+    compute_normal(n5, x+1, z, false);
+    compute_normal(n6, x, z+1, false);
+    if (upper){
+        
+        compute_normal(n1, x, z, true);
+        compute_normal(n2, x+1, z, true);
+        compute_normal(n3, x, z+1, true);
+        compute_normal(n4, x+1, z+1, false);
+        compute_normal(n5, x+1, z, false);
+        compute_normal(n6, x, z+1, false);
+//    compute_normal(n1, x-1, z, true);
+//    compute_normal(n2, x-1, z-1, true);
+//    compute_normal(n3, x, z-1, true);
+//    compute_normal(n4, x, z+1, false);
+//    compute_normal(n5, x+1, z+1, false);
+//    compute_normal(n6, x+1, z, false);
+    }
+    else{
+
+    }
     result[0]=(n1[0]+n2[0]+n3[0]+n4[0]+n5[0]+n6[0])/ 6.0;
     result[1]=(n1[1]+n2[1]+n3[1]+n4[1]+n5[1]+n6[1])/ 6.0;
     result[2]=(n1[2]+n2[2]+n3[2]+n4[2]+n5[2]+n6[2])/ 6.0;
@@ -277,9 +317,9 @@ void drawTerrain(){
     lightP[2] = lightZ;
     
     if(textureOn){
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    }
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, texture);
+    };
 //    //for maping the texture on
 //    glTranslatef(-(float)(terrain.width - 1) / 2, 0, -(float)(terrain.height -1) / 2);
 
@@ -295,35 +335,33 @@ void drawTerrain(){
         for(int x = 0; x < terrain.width-1; x++){
             if(fNorms){
                 //upper
-                if(textureOn){
-                    compute_normal(the_normal, x, z, true);
-                    glNormal3f(the_normal[0], the_normal[1], the_normal[2]);
-                    
-                    //x, y, z
-                    glTexCoord2f((float)(x) / terrain.width, (float)(z) / terrain.height);
-                }
+                compute_normal(the_normal, x, z, true);
+                glNormal3f(the_normal[0], the_normal[1], the_normal[2]);
+                
+                //x, y, z
+                glTexCoord2f((float)(x) / terrain.width, (float)(z) / terrain.height);
+            
                 glVertex3f(x, float(RED(PIXEL(terrain, x, z))), z);
                 //x,y,z+1
-                if(textureOn){ glTexCoord2f((float)(x) / terrain.width, (float)(z+1) / terrain.height);}
+                glTexCoord2f((float)(x) / terrain.width, (float)(z+1) / terrain.height);
                 glVertex3f(x,float(RED(PIXEL(terrain, x, z+1))), z+1 );
                 //x+1,y,z
-                if(textureOn){ glTexCoord2f((float)(x+1) / terrain.width, (float)(z) / terrain.height);}
+                glTexCoord2f((float)(x+1) / terrain.width, (float)(z) / terrain.height);
                 glVertex3f(x+1, float(RED(PIXEL(terrain, x+1, z))),z );
 
                 
                 //lower
-                if(textureOn){
-                        compute_normal(the_normal, x, z, false);
-                    glNormal3f(the_normal[0], the_normal[1], the_normal[2]);
-                }
+                
+                compute_normal(the_normal, x, z, false);
+                glNormal3f(the_normal[0], the_normal[1], the_normal[2]);
                 //x,y,z+1
-                if(textureOn){glTexCoord2f((float)(x) / terrain.width, (float)(z+1) / terrain.height);}
+                glTexCoord2f((float)(x) / terrain.width, (float)(z+1) / terrain.height);
                 glVertex3f(x, float(RED(PIXEL(terrain, x, z+1))), z+1);
                 //x+1,y,z
-                if(textureOn){glTexCoord2f((float)(x+1) / terrain.width, (float)(z) / terrain.height);}
+                glTexCoord2f((float)(x+1) / terrain.width, (float)(z) / terrain.height);
                 glVertex3f(x+1, float(RED(PIXEL(terrain, x+1, z))), z);
                 //x+1, y+1, z+1
-                if(textureOn){glTexCoord2f((float)(x+1) / terrain.width, (float)(z+1) / terrain.height);}
+                glTexCoord2f((float)(x+1) / terrain.width, (float)(z+1) / terrain.height);
                 glVertex3f(x+1, float(RED(PIXEL(terrain, x+1, z+1))), z+1);
             }
             else{
@@ -333,42 +371,42 @@ void drawTerrain(){
                 //x, y, z
                 compute_Vnormal(the_normal, x, z, true);
                 glNormal3f(the_normal[0], the_normal[1], the_normal[2]);
-                if(textureOn){glTexCoord2f((float)(x) / terrain.width, (float)(z) / terrain.height);}
+                glTexCoord2f((float)(x) / terrain.width, (float)(z) / terrain.height);
                 glVertex3f(x, float(RED(PIXEL(terrain, x, z))), z);
                 
                 //x,y,z+1
                 compute_Vnormal(the_normal, x, z+1, true);
                 glNormal3f(the_normal[0], the_normal[1], the_normal[2]);
-                if(textureOn){ glTexCoord2f((float)(x) / terrain.width, (float)(z+1) / terrain.height);}
+                glTexCoord2f((float)(x) / terrain.width, (float)(z+1) / terrain.height);
                 glVertex3f(x,float(RED(PIXEL(terrain, x, z+1))), z+1 );
                 
                 //x+1,y,z
                 compute_Vnormal(the_normal, x+1, z, true);
                 glNormal3f(the_normal[0], the_normal[1], the_normal[2]);
-                if(textureOn){ glTexCoord2f((float)(x+1) / terrain.width, (float)(z) / terrain.height);}
+                glTexCoord2f((float)(x+1) / terrain.width, (float)(z) / terrain.height);
                 glVertex3f(x+1, float(RED(PIXEL(terrain, x+1, z))),z );
                 
                 //x,y,z+1
                 compute_Vnormal(the_normal, x, z+1, false);
                 glNormal3f(the_normal[0], the_normal[1], the_normal[2]);
-                if(textureOn){glTexCoord2f((float)(x) / terrain.width, (float)(z+1) / terrain.height);}
+                glTexCoord2f((float)(x) / terrain.width, (float)(z+1) / terrain.height);
                 glVertex3f(x, float(RED(PIXEL(terrain, x, z+1))), z+1);
                 
                 //x+1,y,z
                 compute_Vnormal(the_normal, x+1, z, false);
                 glNormal3f(the_normal[0], the_normal[1], the_normal[2]);
-                if(textureOn){glTexCoord2f((float)(x+1) / terrain.width, (float)(z) / terrain.height);}
+                glTexCoord2f((float)(x+1) / terrain.width, (float)(z) / terrain.height);
                 glVertex3f(x+1, float(RED(PIXEL(terrain, x+1, z))), z);
                 
                 //x+1, y+1, z+1
                 compute_Vnormal(the_normal, x+1, z+1, false);
                 glNormal3f(the_normal[0], the_normal[1], the_normal[2]);
-                if(textureOn){glTexCoord2f((float)(x+1) / terrain.width, (float)(z+1) / terrain.height);}
+                glTexCoord2f((float)(x+1) / terrain.width, (float)(z+1) / terrain.height);
                 glVertex3f(x+1, float(RED(PIXEL(terrain, x+1, z+1))), z+1);
                 
                 
                 
-            }
+                }
         }
     }
     
@@ -393,7 +431,7 @@ void rotateCamera(void){
 		spinAngle = spinAngle+1;
 	}
 }
-
+//cache
 void newDList(){
     theList = glGenLists(1);
     glNewList(theList, GL_COMPILE);
@@ -430,7 +468,7 @@ void cb_display() {
     glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
 
-    gluLookAt(350,200,350,
+    gluLookAt(300,250,300,
               0,0,0,
               0,1,0);
     
@@ -479,6 +517,7 @@ void loadTextureMap(canvas_t tex) {
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+//    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, tex.width, tex.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex.pixels);
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
@@ -579,7 +618,7 @@ void callback_keyboard(unsigned char key, int x, int y) {
         xposition -= float(sin(yRotationrad));
         yposition += float(sin(xRotationrad));
         zposition += float(cos(yRotationrad));
-        printf("x: %f, y: %f, z: %f \n",xposition,yposition,zposition);
+//        printf("x: %f, y: %f, z: %f \n",xposition,yposition,zposition);
     }
     
     if(key == 'd')
@@ -601,23 +640,26 @@ void callback_keyboard(unsigned char key, int x, int y) {
     
     if( key =='i'){
         lightX += 50;
-        printf("Moved Light Down\n");
-        printf("lightX: %f, lightY:%f, LightZ:%f \n",lightX,lightY,lightZ);
+//        printf("Moved Light Down\n");
+//        printf("lightX: %f, lightY:%f, LightZ:%f \n",lightX,lightY,lightZ);
         
     }
     if( key =='k'){
         lightX -= 50;
         
-        printf("Moved Light Up \n");
+//        printf("Moved Light Up \n");
     }
     if( key =='j'){
         lightZ += 50;
         
-        printf("Moved Light Right\n");
+//        printf("Moved Light Right\n");
     }
     if( key =='l'){
         lightZ -= 50;
-        printf("Moved Light Left\n");
+//        printf("Moved Light Left\n");
+    }
+    if (key =='t'){
+        textureOn = !textureOn;
     }
     
 //    cb_reshap
@@ -661,9 +703,9 @@ int main(int argc, char** argv) {
            "S to spin\n"
            "f switch from Face normals to vertex normals\n"
            "b switch on/off display mode(on by default)\n"
+           "t switch textures on/off\n"
            "q to quit\n"
            );
-	//terrain->drawTerrain();
     loadHeights();
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glEnable (GL_DEPTH_TEST);
@@ -672,15 +714,11 @@ int main(int argc, char** argv) {
 	
     nearPlane = .1;
     farPlane = 1000;
-//    ambientC[0] = .4;
-//    ambientC[1] = .4;
-//    ambientC[2] = .4;
 //    
     glDepthFunc(GL_LEQUAL);
-//    glEnable(GL_NORMALIZE);
+    
     newDList();
     
-//    createTerrainDisplayList();
 	
 	glutDisplayFunc(cb_display);
 	glutReshapeFunc(cb_reshape);
