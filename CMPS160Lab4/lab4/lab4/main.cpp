@@ -94,6 +94,20 @@ void eye(){
     glPopMatrix();
     
 }
+
+void eye2(){
+    //face
+    glPushMatrix();
+//    glColor3ub(160, 220, 250);
+//    glTranslatef(1.5,0.25,-2);
+    glutSolidSphere(.25,5,5);
+//    glTranslatef(0,-0.5,0);
+//    glColor3ub(160, 220, 250);
+//    glutSolidSphere(.25,5,5);
+    glPopMatrix();
+    
+}
+
 void mouth(){
     glColor3ub(245, 29, 201);
     glPushMatrix();
@@ -444,7 +458,8 @@ void animateArm(){
 
 void animalTime(){
     glPushMatrix();
-    // glScalef(0.1f,0.1f,0.1f);
+    glScalef(2.0f,2.0f,2.0f);
+    glTranslated(100,30,100);
     glPushMatrix();
     glTranslatef(0,.3,-.5);
     glScalef(1,1.5,.5);
@@ -673,7 +688,7 @@ void compute_Vnormal(float *result, int x, int z, bool upper) {
 }
 void drawTerrain(){
     
-    eye();
+//    eye2();
     
    lightP[0] = lightX;
    lightP[1] = lightY;
@@ -929,8 +944,8 @@ void cb_display() {
    draw_axis(4.0);
     
     animalTime();
-   drawTerrain();//
- drawTexture();
+    drawTerrain();//
+//    drawTexture();
     
     
  glFlush();
@@ -1147,7 +1162,7 @@ int main(int argc, char** argv) {
     glutIdleFunc(cb_idle);
     glutKeyboardFunc(cb_keyboard);
     
-    glClearColor(0,0,0,0); // set background to black
+    glClearColor(255,0,0,0); // set background to black
     printf("Welcome! Here are the controls. \n A on/off Animation \n S on/off spining \n Q to Quit \n \n G g Move Right Leg \n H h Move Left Leg \n J j move Right Foot \n K k Move Left Foot \n U u Change rotation 1st arm segment \n I i Change rotation 2nd arm segment \n O o Pour Tea");
     glutMainLoop();
     
