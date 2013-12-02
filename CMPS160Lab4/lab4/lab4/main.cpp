@@ -64,6 +64,9 @@ struct animalSt{
     float animalMoveZ =0.0f;
     float animalForwardAngle =0.0f;
     float animalMoveT =0.0f;
+    float height = 0.0f;
+    float rotationVector[3];
+    float rotationAngle= 0.0;
 };
 typedef struct animalSt animal;
  animalSt an1,an2,an3;
@@ -603,37 +606,6 @@ void spin() {
  }
 }
 
-void genNormals(){
-   float the_normal[3];//
-   
-   //    fNormals = new float*[terrain.height][terrain.width][2];
-   for(int i = 0; i < terrain.height; i++)
-   {
-       fNormals[i] = new float[terrain.width];
-   }
-   
-   float upper[terrain.height][terrain.width];
-   
-   
-   //    int n,m;
-   //    for (n=0;n<terrain.height-1;n++)
-   //        for (m=0;m<terrain.width-1;m++)
-   //        {
-   //            jimmy[n][m][0]=
-   //
-   //        }
-   //
-   //
-   //    for(int z = 0; z < terrain.height-1; z++){
-   //        for(int x = 0; x < terrain.width-1; x++){
-   //            compute_normal(the_normal, x, z, true);
-   //            upper[x][z][1]=the_normal;
-   //            compute_normal(the_normal, x, z, false);
-   //            jimmy[x][z][0]=the_normal;
-   //            }
-   //    }
-   
-}
 
 void compute_Vnormal(float *result, int x, int z, bool upper) {
    //bad boundry cases, should be cleaned up
@@ -682,8 +654,8 @@ void compute_Vnormal(float *result, int x, int z, bool upper) {
    compute_normal(n4, x+1, z+1, false);
    compute_normal(n5, x+1, z, false);
    compute_normal(n6, x, z+1, false);
-   if (upper){
-       
+//   if (upper){
+    
        compute_normal(n1, x, z, true);
        compute_normal(n2, x+1, z, true);
        compute_normal(n3, x, z+1, true);
@@ -696,10 +668,10 @@ void compute_Vnormal(float *result, int x, int z, bool upper) {
        //    compute_normal(n4, x, z+1, false);
        //    compute_normal(n5, x+1, z+1, false);
        //    compute_normal(n6, x+1, z, false);
-   }
-   else{
-       
-   }
+//   }
+//   else{
+//    
+//   }
    result[0]=(n1[0]+n2[0]+n3[0]+n4[0]+n5[0]+n6[0])/ 6.0;
    result[1]=(n1[1]+n2[1]+n3[1]+n4[1]+n5[1]+n6[1])/ 6.0;
    result[2]=(n1[2]+n2[2]+n3[2]+n4[2]+n5[2]+n6[2])/ 6.0;
@@ -842,23 +814,45 @@ void newDList(){
    glEndList();
 }
 
-// void cb_display() {
+void rotateAnimal(animal *an){
+    int x = an->animalMoveX;
+    int z = an->animalMoveZ;
+    float the_normal[3];//
+    compute_Vnormal(the_normal, x, z, true);
+    float the_up_vector[3] = {0.0f,1.0f,0.0f};
+    float rotateV[3];
+    cross(rotateV, the_up_vector,the_normal);
+    float dot = 0.0;
+    dot = the_up_vector[0]*the_normal[0];
+    dot += the_up_vector[1]*the_normal[2];
+    dot += the_up_vector[1]*the_normal[2];
     
+    an->rotationAngle = dot * 180 / PI;;
+    an->rotationVector[0] = rotateV[0];
+    an->rotationVector[1] = rotateV[1];
+    an->rotationVector[2] = rotateV[2];
     
+    //float *cResult, float a[3], float b[3]
+    //up vector of animal =
+    //[0,1,0]
+    // up vector cross with normal at surface
+    //
     
+}
+
+void findHeight(animal *an){
+//    an->animalMoveY = float(RED(PIXEL(terrain, (int)an->animalMoveX, (int)an->animalMoveZ)));
+    int xF = floor(an->animalMoveX);
+    int zF = floor(an->animalMoveZ);
+    int xC = ceil(an->animalMoveX);
+    int zC = ceil(an->animalMoveZ);
+    int sam1 = float(RED(PIXEL(terrain, xF, zF)));
+    int sam2 = float(RED(PIXEL(terrain, xC, zC)));
+    int sam3 = float(RED(PIXEL(terrain, xF, zC)));
+    int sam4 = float(RED(PIXEL(terrain, xC, zF)));
+    an->animalMoveY = (float)((sam1+sam2+sam3+sam4)/4);
     
-    
-    
-    
-    
-//     glFlush();
-//     glutSwapBuffers(); // for smoother animation
-// }
-//void updateAnimalMove(float *animalMoveX,float *animalMoveY, float *animalMoveZ){
-//    
-//}
-//
-//void update2(struct animal);
+}
 
 void update2(animal *an){
 //    t = t+.01;
@@ -875,9 +869,6 @@ void update2(animal *an){
         float dz = an->animalMoveZ - (y +sin(an->animalMoveT)*50);
         an->animalMoveX = x +cos(an->animalMoveT)*50;
         an->animalMoveZ = y +sin(an->animalMoveT)*50;
-        //height map
-        //call bilinear inter here
-        an->animalMoveY = float(RED(PIXEL(terrain, (int)an->animalMoveX, (int)an->animalMoveZ)));
         an->animalForwardAngle = atan2 (dx,dz) * 180 / PI;;
         an->animalForwardAngle += 90.0f;
     }
@@ -889,9 +880,6 @@ void update2(animal *an){
         float dz = an->animalMoveZ - (y +cos(an->animalMoveT)*50);
         an->animalMoveX = x +sin(an->animalMoveT)*50;
         an->animalMoveZ = y +cos(an->animalMoveT)*50;
-        //height map
-        //call bilinear inter here
-        an->animalMoveY = float(RED(PIXEL(terrain, (int)an->animalMoveX, (int)an->animalMoveZ)));
         an->animalForwardAngle = atan2 (dx,dz) * 180 / PI;;
         an->animalForwardAngle += 90.0f;
     }
@@ -903,16 +891,20 @@ void update2(animal *an){
         float dz = an->animalMoveZ - (y +cos(an->animalMoveT)*50);
         an->animalMoveX = x + sin(an->animalMoveT)*30;
         an->animalMoveZ = y + cos(an->animalMoveT)*50;
-        //height map
-        //call bilinear inter here
-        an->animalMoveY = float(RED(PIXEL(terrain, (int)an->animalMoveX, (int)an->animalMoveZ)));
         an->animalForwardAngle = atan2 (dx,dz) * 180 / PI;;
         an->animalForwardAngle += 90.0f;
     }
-//    printf("forward ang: %f \n",an.animalForwardAngle);
-    printf("time: %f\n",an->animalMoveT);
-//    printf("X: %f\n",an->animalMoveX);
-//    prinft(")
+////    printf("forward ang: %f \n",an.animalForwardAngle);
+//    printf("time: %f\n",an->animalMoveT);
+////    printf("X: %f\n",an->animalMoveX);
+////    prinft(")
+    
+    //height map
+    //call bilinear inter here
+    findHeight(an);
+    rotateAnimal(an);
+//
+    
 }
 void animalMove(){
 //    if(animalMoveT>360) animalMoveT=0;
@@ -934,8 +926,10 @@ void animalMove(){
     glPushMatrix();
     glTranslatef(an1.animalMoveX,an1.animalMoveY,an1.animalMoveZ);
     glRotatef(an1.animalForwardAngle,0.0f,1.0f,0.0f);
+    glRotatef(-(an1.rotationAngle)*1,-an1.rotationVector[0],-an1.rotationVector[1],-an1.rotationVector[2]);
     animalTime();
     glPopMatrix();
+    printf("rotation Angle: %f\n",an1.rotationAngle);
     
     glPushMatrix();
     glTranslatef(an2.animalMoveX,an2.animalMoveY,an2.animalMoveZ);
@@ -986,9 +980,10 @@ void cb_display() {
              0,1,0);
     }
     if(look == 1){
-        gluLookAt(an1.animalMoveX - 20,an1.animalMoveY + 50 ,an1.animalMoveZ - 20,
+        gluLookAt(an1.animalMoveX + 10,an1.animalMoveY + 30 ,an1.animalMoveZ - 10,
                   an1.animalMoveX,an1.animalMoveY,an1.animalMoveZ,
                   0,1,0);
+//         glRotatef(an1.animalForwardAngle,0.0f,1.0f,0.0f);
     }
     if(look == 2){
         gluLookAt(an2.animalMoveX - 20,an2.animalMoveY + 50 ,an2.animalMoveZ - 20,
