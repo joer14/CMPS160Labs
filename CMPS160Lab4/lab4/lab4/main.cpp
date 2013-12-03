@@ -27,7 +27,7 @@ float xposition = 0, yposition = 0, zposition = 0;
 float xRotation, yRotation = 0, zRotation=0;
 
 int windowWidth, windowHeight;
-
+static int look=0;
 float spinAngle = 0;
 bool is_spinning = false;
 bool dListOn= true;
@@ -67,26 +67,33 @@ struct animalSt{
     float height = 0.0f;
     float rotationVector[3];
     float rotationAngle= 0.0;
+    
+    // animation variables
+    float angle = 0;
+    float armA = 0;
+    float armA2 = 0;
+    float spinA = 0;
+    float teaA = 0;
+    float bodyTwerk = 1;
+    int dup = 1;
+    int knee1=0, knee2=0, ank1=0, ank2=0;
+    //bool is_spinning = false;
+    bool rKnee1 = true;
+    bool rAnk1 = true;
+    bool rAnk2 = false;
+    bool animate = false;
+    bool armABack = true;
+    bool moveArm = true;
+    bool moveTea = false;
+    int rt=255, bt=0, gt=200;
+    
 };
 typedef struct animalSt animal;
  animalSt an1,an2,an3;
-//
-//
-//struct Y {
-//    int r;
-//    int s;
-//    int t;
-//};
-//
-//struct Y y = { .r = 1, .s = 2, .t = 3 };
-
-
-//float animalMoveT =0.0f;
 
 //GLuint texture;
 GLuint theList;
 
-static int look=0;
 // Global variables
 float angle = 0;
 float armA = 0;
@@ -223,7 +230,32 @@ void body(){
 }
 
 
-void leftArm(){
+void leftArm(animal *an){
+    float angle = an->angle;
+    float armA = an->armA;
+    float armA2 = an->armA2;
+    float spinA = an->spinA;
+    float teaA = an->teaA;
+    //    float bodyTwerk = 1;
+    //    int dup = 1;
+    int knee1= an->knee1;
+    int knee2= an->knee2;
+    int ank1= an->ank1;
+    int ank2= an->ank2;
+    
+    
+    //bool is_spinning = false;
+    bool rKnee1 = an->rKnee1;
+    bool rAnk1 = an->rAnk1;
+    bool rAnk2 = an->rAnk2;
+    bool animate = an->animate;
+    bool armABack = an->armABack;
+    bool moveArm = an->moveArm;
+    bool moveTea = an->moveTea;
+    int rt=an->rt;
+    int bt=an->bt;
+    int gt=an->gt;
+
     glColor3ub(255, 200, 0);
     
     glRotatef(90,0,1,0);
@@ -261,10 +293,56 @@ void leftArm(){
     
     
     glPopMatrix();
+    an->angle = angle;
+    an->armA = armA;
+    an->armA2 = armA2;
+    an->spinA = spinA;
+    an->teaA = teaA;
+    an->knee1 = knee1;
+    an->knee2 = knee2;
+    an->ank1 = ank1;
+    an->ank2 = ank2;
     
+    
+    //bool is_spinning = false;
+    an->rKnee1 = rKnee1;
+    an->rAnk1 = rAnk1;
+    an->rAnk2 = rAnk2;
+    an->animate = animate;
+    an->armABack = armABack;
+    an->moveArm = moveArm;
+    an->moveTea = moveTea;
+    an->rt = rt;
+    an->bt = bt;
+    an->gt = gt;
     
 }
-void rightArm(){
+void rightArm(animal *an){
+    float angle = an->angle;
+    float armA = an->armA;
+    float armA2 = an->armA2;
+    float spinA = an->spinA;
+    float teaA = an->teaA;
+    //    float bodyTwerk = 1;
+    //    int dup = 1;
+    int knee1= an->knee1;
+    int knee2= an->knee2;
+    int ank1= an->ank1;
+    int ank2= an->ank2;
+    
+    
+    //bool is_spinning = false;
+    bool rKnee1 = an->rKnee1;
+    bool rAnk1 = an->rAnk1;
+    bool rAnk2 = an->rAnk2;
+    bool animate = an->animate;
+    bool armABack = an->armABack;
+    bool moveArm = an->moveArm;
+    bool moveTea = an->moveTea;
+    int rt=an->rt;
+    int bt=an->bt;
+    int gt=an->gt;
+
     glColor3ub(255, 200, 0);
     
     glRotatef(90,0,1,0);
@@ -323,11 +401,58 @@ void rightArm(){
     
     glPopMatrix();
     
+    an->angle = angle;
+    an->armA = armA;
+    an->armA2 = armA2;
+    an->spinA = spinA;
+    an->teaA = teaA;
+    an->knee1 = knee1;
+    an->knee2 = knee2;
+    an->ank1 = ank1;
+    an->ank2 = ank2;
     
+    
+    //bool is_spinning = false;
+    an->rKnee1 = rKnee1;
+    an->rAnk1 = rAnk1;
+    an->rAnk2 = rAnk2;
+    an->animate = animate;
+    an->armABack = armABack;
+    an->moveArm = moveArm;
+    an->moveTea = moveTea;
+    an->rt = rt;
+    an->bt = bt;
+    an->gt = gt;
 }
 
 
-void leftLeg(){
+void leftLeg(animal *an){
+    float angle = an->angle;
+    float armA = an->armA;
+    float armA2 = an->armA2;
+    float spinA = an->spinA;
+    float teaA = an->teaA;
+//    float bodyTwerk = 1;
+//    int dup = 1;
+    int knee1= an->knee1;
+    int knee2= an->knee2;
+    int ank1= an->ank1;
+    int ank2= an->ank2;
+
+    
+    //bool is_spinning = false;
+    bool rKnee1 = an->rKnee1;
+    bool rAnk1 = an->rAnk1;
+    bool rAnk2 = an->rAnk2;
+    bool animate = an->animate;
+    bool armABack = an->armABack;
+    bool moveArm = an->moveArm;
+    bool moveTea = an->moveTea;
+    int rt=an->rt;
+    int bt=an->bt;
+    int gt=an->gt;
+    
+    
     glPushMatrix();
     glRotatef(15,0,1,0);
     glScalef(-.8,1,1);
@@ -359,8 +484,56 @@ void leftLeg(){
     glPopMatrix();
     glPopMatrix();
     glPopMatrix();
+    
+    an->angle = angle;
+    an->armA = armA;
+    an->armA2 = armA2;
+    an->spinA = spinA;
+    an->teaA = teaA;
+    an->knee1 = knee1;
+    an->knee2 = knee2;
+    an->ank1 = ank1;
+    an->ank2 = ank2;
+    
+    
+    //bool is_spinning = false;
+    an->rKnee1 = rKnee1;
+    an->rAnk1 = rAnk1;
+    an->rAnk2 = rAnk2;
+    an->animate = animate;
+    an->armABack = armABack;
+    an->moveArm = moveArm;
+    an->moveTea = moveTea;
+    an->rt = rt;
+    an->bt = bt;
+    an->gt = gt;
 }
-void rightLeg(){
+void rightLeg(animal *an){
+    float angle = an->angle;
+    float armA = an->armA;
+    float armA2 = an->armA2;
+    float spinA = an->spinA;
+    float teaA = an->teaA;
+    //    float bodyTwerk = 1;
+    //    int dup = 1;
+    int knee1= an->knee1;
+    int knee2= an->knee2;
+    int ank1= an->ank1;
+    int ank2= an->ank2;
+    
+    
+    //bool is_spinning = false;
+    bool rKnee1 = an->rKnee1;
+    bool rAnk1 = an->rAnk1;
+    bool rAnk2 = an->rAnk2;
+    bool animate = an->animate;
+    bool armABack = an->armABack;
+    bool moveArm = an->moveArm;
+    bool moveTea = an->moveTea;
+    int rt=an->rt;
+    int bt=an->bt;
+    int gt=an->gt;
+
     glPushMatrix();
     glRotatef(15,0,1,0);
     glScalef(-0.8,1,1);
@@ -394,9 +567,57 @@ void rightLeg(){
     
     glPopMatrix();
     glPopMatrix();
+    
+    an->angle = angle;
+    an->armA = armA;
+    an->armA2 = armA2;
+    an->spinA = spinA;
+    an->teaA = teaA;
+    an->knee1 = knee1;
+    an->knee2 = knee2;
+    an->ank1 = ank1;
+    an->ank2 = ank2;
+    
+    
+    //bool is_spinning = false;
+    an->rKnee1 = rKnee1;
+    an->rAnk1 = rAnk1;
+    an->rAnk2 = rAnk2;
+    an->animate = animate;
+    an->armABack = armABack;
+    an->moveArm = moveArm;
+    an->moveTea = moveTea;
+    an->rt = rt;
+    an->bt = bt;
+    an->gt = gt;
 }
 
-void animateKnee(){
+void animateKnee(animal *an){
+    float angle = an->angle;
+    float armA = an->armA;
+    float armA2 = an->armA2;
+    float spinA = an->spinA;
+    float teaA = an->teaA;
+    //    float bodyTwerk = 1;
+    //    int dup = 1;
+    int knee1= an->knee1;
+    int knee2= an->knee2;
+    int ank1= an->ank1;
+    int ank2= an->ank2;
+    
+    
+    //bool is_spinning = false;
+    bool rKnee1 = an->rKnee1;
+    bool rAnk1 = an->rAnk1;
+    bool rAnk2 = an->rAnk2;
+    bool animate = an->animate;
+    bool armABack = an->armABack;
+    bool moveArm = an->moveArm;
+    bool moveTea = an->moveTea;
+    int rt=an->rt;
+    int bt=an->bt;
+    int gt=an->gt;
+
     if(rKnee1){
         knee1 = (knee1 + 5) % 360;
     }
@@ -414,8 +635,56 @@ void animateKnee(){
     }
     knee2 = (-knee1)% 360;
     
+    an->angle = angle;
+    an->armA = armA;
+    an->armA2 = armA2;
+    an->spinA = spinA;
+    an->teaA = teaA;
+    an->knee1 = knee1;
+    an->knee2 = knee2;
+    an->ank1 = ank1;
+    an->ank2 = ank2;
+    
+    
+    //bool is_spinning = false;
+    an->rKnee1 = rKnee1;
+    an->rAnk1 = rAnk1;
+    an->rAnk2 = rAnk2;
+    an->animate = animate;
+    an->armABack = armABack;
+    an->moveArm = moveArm;
+    an->moveTea = moveTea;
+    an->rt = rt;
+    an->bt = bt;
+    an->gt = gt;
 }
-void animateAnk(){
+void animateAnk(animal *an){
+    float angle = an->angle;
+    float armA = an->armA;
+    float armA2 = an->armA2;
+    float spinA = an->spinA;
+    float teaA = an->teaA;
+    //    float bodyTwerk = 1;
+    //    int dup = 1;
+    int knee1= an->knee1;
+    int knee2= an->knee2;
+    int ank1= an->ank1;
+    int ank2= an->ank2;
+    
+    
+    //bool is_spinning = false;
+    bool rKnee1 = an->rKnee1;
+    bool rAnk1 = an->rAnk1;
+    bool rAnk2 = an->rAnk2;
+    bool animate = an->animate;
+    bool armABack = an->armABack;
+    bool moveArm = an->moveArm;
+    bool moveTea = an->moveTea;
+    int rt=an->rt;
+    int bt=an->bt;
+    int gt=an->gt;
+
+    
     if (rAnk1){
         ank1 = (ank1 + 5) % 360;
     }
@@ -429,9 +698,56 @@ void animateAnk(){
     ank2= (-ank1 - 20)% 360;
     //    ank3= (ank2 -90)%360;
     
+    an->angle = angle;
+    an->armA = armA;
+    an->armA2 = armA2;
+    an->spinA = spinA;
+    an->teaA = teaA;
+    an->knee1 = knee1;
+    an->knee2 = knee2;
+    an->ank1 = ank1;
+    an->ank2 = ank2;
+    
+    
+    //bool is_spinning = false;
+    an->rKnee1 = rKnee1;
+    an->rAnk1 = rAnk1;
+    an->rAnk2 = rAnk2;
+    an->animate = animate;
+    an->armABack = armABack;
+    an->moveArm = moveArm;
+    an->moveTea = moveTea;
+    an->rt = rt;
+    an->bt = bt;
+    an->gt = gt;
 }
 
-void teaTime(){
+void teaTime(animal *an){
+    float angle = an->angle;
+    float armA = an->armA;
+    float armA2 = an->armA2;
+    float spinA = an->spinA;
+    float teaA = an->teaA;
+    //    float bodyTwerk = 1;
+    //    int dup = 1;
+    int knee1= an->knee1;
+    int knee2= an->knee2;
+    int ank1= an->ank1;
+    int ank2= an->ank2;
+    
+    
+    //bool is_spinning = false;
+    bool rKnee1 = an->rKnee1;
+    bool rAnk1 = an->rAnk1;
+    bool rAnk2 = an->rAnk2;
+    bool animate = an->animate;
+    bool armABack = an->armABack;
+    bool moveArm = an->moveArm;
+    bool moveTea = an->moveTea;
+    int rt=an->rt;
+    int bt=an->bt;
+    int gt=an->gt;
+
     if (teaA >90) {
         moveTea = false;
         moveArm = false;
@@ -449,10 +765,56 @@ void teaTime(){
     if (!moveArm && !moveTea){
         teaA = ((int)teaA - 1) % 360;
     }
+    an->angle = angle;
+    an->armA = armA;
+    an->armA2 = armA2;
+    an->spinA = spinA;
+    an->teaA = teaA;
+    an->knee1 = knee1;
+    an->knee2 = knee2;
+    an->ank1 = ank1;
+    an->ank2 = ank2;
     
+    
+    //bool is_spinning = false;
+    an->rKnee1 = rKnee1;
+    an->rAnk1 = rAnk1;
+    an->rAnk2 = rAnk2;
+    an->animate = animate;
+    an->armABack = armABack;
+    an->moveArm = moveArm;
+    an->moveTea = moveTea;
+    an->rt = rt;
+    an->bt = bt;
+    an->gt = gt;
 }
 
-void animateArm(){
+void animateArm(animal *an){
+    float angle = an->angle;
+    float armA = an->armA;
+    float armA2 = an->armA2;
+    float spinA = an->spinA;
+    float teaA = an->teaA;
+    //    float bodyTwerk = 1;
+    //    int dup = 1;
+    int knee1= an->knee1;
+    int knee2= an->knee2;
+    int ank1= an->ank1;
+    int ank2= an->ank2;
+    
+    
+    //bool is_spinning = false;
+    bool rKnee1 = an->rKnee1;
+    bool rAnk1 = an->rAnk1;
+    bool rAnk2 = an->rAnk2;
+    bool animate = an->animate;
+    bool armABack = an->armABack;
+    bool moveArm = an->moveArm;
+    bool moveTea = an->moveTea;
+    int rt=an->rt;
+    int bt=an->bt;
+    int gt=an->gt;
+
     
     //    printf("armA: %d\n", (int)teaA);
     
@@ -474,17 +836,39 @@ void animateArm(){
             armABack = true;
             moveArm = false;
             moveTea = true;
-            teaTime();
+            teaTime(an);
         }
         if (armA < -45){
             armABack = false;
         }
         
     }
-    else teaTime();
+    else teaTime(an);
+    an->angle = angle;
+    an->armA = armA;
+    an->armA2 = armA2;
+    an->spinA = spinA;
+    an->teaA = teaA;
+    an->knee1 = knee1;
+    an->knee2 = knee2;
+    an->ank1 = ank1;
+    an->ank2 = ank2;
+    
+    
+    //bool is_spinning = false;
+    an->rKnee1 = rKnee1;
+    an->rAnk1 = rAnk1;
+    an->rAnk2 = rAnk2;
+    an->animate = animate;
+    an->armABack = armABack;
+    an->moveArm = moveArm;
+    an->moveTea = moveTea;
+    an->rt = rt;
+    an->bt = bt;
+    an->gt = gt;
 }
 
-void animalTime(){
+void animalTime(animal *an){
     glPushMatrix();
 //    glutSolidTeapot(0.2f);
 //    glScalef(2.0f,2.0f,2.0f);
@@ -494,21 +878,21 @@ void animalTime(){
     glPushMatrix();
     glTranslatef(0,.3,-.5);
     glScalef(1,1.5,.5);
-    leftLeg();
+    leftLeg(an);
     glPopMatrix();
     glPushMatrix();
     glTranslatef(0,.3,.5);
     glScalef(1,1.5,.5);
-    rightLeg();
+    rightLeg(an);
     glPopMatrix();
     glPushMatrix();
     glTranslatef(0,5,0);
-    rightArm();
+    rightArm(an);
     glPopMatrix();
     glPushMatrix();
     glTranslatef(0,5,0);
     glScalef(-1,1,-1);
-    rightArm();
+    rightArm(an);
     glPopMatrix();
     
     glPushMatrix();
@@ -876,7 +1260,7 @@ void findHeight(animal *an){
     float result = (x2-x1)*(z2-z1);
     result = 1/result;
     result = result*r1;
-    printf("result: %f\n",result);
+//    printf("result: %f\n",result);
     //    int result = (q11*(x2-x)*(z2-z));
     //    result =(q21*(x-x1)*(z2-z));
     //    result =(q12*(x2-x)*(z-z1));
@@ -886,6 +1270,11 @@ void findHeight(animal *an){
 }
 
 void update2(animal *an){
+    if (animate){
+        animateKnee(an);
+        animateAnk(an);
+        animateArm(an);
+    };
 //    t = t+.01;
     int x= (an->x);
     int y= an->y;
@@ -952,31 +1341,32 @@ void animalMove(){
     
     
     update2(&an1);
-//    update2(&an2);
-//    update2(&an3);
+    update2(&an2);
+    update2(&an3);
     glPushMatrix();
     glTranslatef(an1.animalMoveX,an1.animalMoveY,an1.animalMoveZ);
     glRotatef((an1.rotationAngle),an1.rotationVector[0],an1.rotationVector[1],an1.rotationVector[2]);
     glRotatef(an1.animalForwardAngle,0.0f,1.0f,0.0f);
     
-    animalTime();
+    animalTime(&an1);
     glPopMatrix();
     printf("rotation Angle: %f\n",an1.rotationAngle);
     
     glPushMatrix();
     glTranslatef(an2.animalMoveX,an2.animalMoveY,an2.animalMoveZ);
+    glRotatef((an2.rotationAngle),an2.rotationVector[0],an2.rotationVector[1],an2.rotationVector[2]);
     glRotatef(an2.animalForwardAngle,0.0f,1.0f,0.0f);
-//    glRotatef((an2.rotationAngle)*-2,an2.rotationVector[0],an2.rotationVector[1],an2.rotationVector[2]);
     
-    animalTime();
+    
+    animalTime(&an2);
     glPopMatrix();
     
     glPushMatrix();
     glTranslatef(an3.animalMoveX,an3.animalMoveY,an3.animalMoveZ);
+    glRotatef((an3.rotationAngle),an3.rotationVector[0],an3.rotationVector[1],an3.rotationVector[2]);
     glRotatef(an3.animalForwardAngle,0.0f,1.0f,0.0f);
-//    glRotatef((an3.rotationAngle)*-2,an3.rotationVector[0],an3.rotationVector[1],an3.rotationVector[2]);
     
-    animalTime();
+    animalTime(&an3);
     glPopMatrix();
 
     //    printf("An1 X: %f\n",an1.animalMoveX);
@@ -1063,11 +1453,7 @@ void cb_display() {
     }
     previous_clock = now;
     
-    if (animate){
-        animateKnee();
-        animateAnk();
-        animateArm();
-    };
+    
     //    int armAB = armA % (uintmax_t)now;
     glClear(GL_COLOR_BUFFER_BIT);
     
@@ -1308,14 +1694,15 @@ int main(int argc, char** argv) {
     printf("Welcome!!!\n"
            "Controls:\n\n"
            "c/v to rotate up/down \n"
-           "WASD to move around the terrain\n"
-           "n/N to decrease/increase near plane distance\n"
-           "m/M to decrease/increase far plane distance\n"
+           "wsad to move around the terrain\n"
+           "A to start/stop animation\n"
+           "R to reset animation\n"
+           "1,2,3 for animal views\n"
+           "0,4 for global view\n"
+           "5 for plane view of animal 1\n"
            "i/k to move the light up/down\n"
            "j/l to move the light left/right\n"
            "S to spin\n"
-           "f switch from Face normals to vertex normals\n"
-           "b switch on/off display mode(on by default)\n"
            "t switch textures on/off\n"
            "q to quit\n"
            );
