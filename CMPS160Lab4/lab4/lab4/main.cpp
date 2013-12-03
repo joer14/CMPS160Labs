@@ -819,7 +819,7 @@ void rotateAnimal(animal *an){
     int z = an->animalMoveZ;
     float the_normal[3];//
     compute_Vnormal(the_normal, x, z, true);
-    float the_up_vector[3] = {0.0f,1.0f,0.0f};
+    float the_up_vector[3] = {0.0f,-1.0f,0.0f};
     float rotateV[3];
     cross(rotateV, the_up_vector,the_normal);
     float dot = 0.0;
@@ -827,7 +827,7 @@ void rotateAnimal(animal *an){
     dot += the_up_vector[1]*the_normal[2];
     dot += the_up_vector[1]*the_normal[2];
     
-    an->rotationAngle = dot * 180 / PI;;
+    an->rotationAngle = dot;
     an->rotationVector[0] = rotateV[0];
     an->rotationVector[1] = rotateV[1];
     an->rotationVector[2] = rotateV[2];
@@ -862,7 +862,7 @@ void update2(animal *an){
     
     
     if (an->id == 1){
-        an->animalMoveT += 0.01f;
+        an->animalMoveT += 0.009f;
 //        an->animalMoveT= animalMoveT;
         
         float dx = an->animalMoveX - (x +cos(an->animalMoveT)*50);
@@ -926,20 +926,24 @@ void animalMove(){
     glPushMatrix();
     glTranslatef(an1.animalMoveX,an1.animalMoveY,an1.animalMoveZ);
     glRotatef(an1.animalForwardAngle,0.0f,1.0f,0.0f);
-    glRotatef(-(an1.rotationAngle)*1,-an1.rotationVector[0],-an1.rotationVector[1],-an1.rotationVector[2]);
+    glRotatef((an1.rotationAngle)*-2,an1.rotationVector[0],an1.rotationVector[1],an1.rotationVector[2]);
     animalTime();
     glPopMatrix();
-    printf("rotation Angle: %f\n",an1.rotationAngle);
+//    printf("rotation Angle: %f\n",an1.rotationAngle);
     
     glPushMatrix();
     glTranslatef(an2.animalMoveX,an2.animalMoveY,an2.animalMoveZ);
     glRotatef(an2.animalForwardAngle,0.0f,1.0f,0.0f);
+    glRotatef((an2.rotationAngle)*-2,an2.rotationVector[0],an2.rotationVector[1],an2.rotationVector[2]);
+    
     animalTime();
     glPopMatrix();
     
     glPushMatrix();
     glTranslatef(an3.animalMoveX,an3.animalMoveY,an3.animalMoveZ);
     glRotatef(an3.animalForwardAngle,0.0f,1.0f,0.0f);
+    glRotatef((an3.rotationAngle)*-2,an3.rotationVector[0],an3.rotationVector[1],an3.rotationVector[2]);
+    
     animalTime();
     glPopMatrix();
 
@@ -965,8 +969,6 @@ void cb_display() {
    glShadeModel(GL_SMOOTH);
    
    
-   
-   
    glPushMatrix();
    glMatrixMode(GL_PROJECTION);
    glLoadIdentity();
@@ -986,12 +988,12 @@ void cb_display() {
 //         glRotatef(an1.animalForwardAngle,0.0f,1.0f,0.0f);
     }
     if(look == 2){
-        gluLookAt(an2.animalMoveX - 20,an2.animalMoveY + 50 ,an2.animalMoveZ - 20,
+        gluLookAt(an2.animalMoveX + 10,an2.animalMoveY + 30 ,an2.animalMoveZ - 10,
                   an2.animalMoveX,an2.animalMoveY,an2.animalMoveZ,
                   0,1,0);
     }
     if(look == 3){
-        gluLookAt(an3.animalMoveX - 20,an3.animalMoveY + 50 ,an3.animalMoveZ - 20,
+        gluLookAt(an3.animalMoveX + 10,an3.animalMoveY + 30 ,an3.animalMoveZ - 10,
                   an3.animalMoveX,an3.animalMoveY,an3.animalMoveZ,
                   0,1,0);
     }
