@@ -21,7 +21,7 @@
 #include "ppm_canvas.h"
 //#include "util.h"
 
-#define PI 3.14159265
+#define PI 3.14159265f
 
 float xposition = 0, yposition = 0, zposition = 0;
 float xRotation, yRotation = 0, zRotation=0;
@@ -56,8 +56,8 @@ float specularColour[4] = {0, 0, 0, 1};
 // struct animalSt animalSt;
 
 struct animalSt{
-    int x;
-    int y;
+    int x = 0;
+    int y = 0;
     int id;
     float animalMoveX =0.0f;
     float animalMoveY =0.0f;
@@ -486,8 +486,10 @@ void animateArm(){
 
 void animalTime(){
     glPushMatrix();
-    glScalef(2.0f,2.0f,2.0f);
-    glTranslatef(0,2.5f,0);
+//    glutSolidTeapot(0.2f);
+//    glScalef(2.0f,2.0f,2.0f);
+//    glScalef(0.2f,0.2f,0.2f);
+    glTranslatef(0,1.2f,0);
 //    glTranslatef(terrain.width/2,2.5f,terrain.height/2);
     glPushMatrix();
     glTranslatef(0,.3,-.5);
@@ -554,7 +556,7 @@ void diff(float *cResult, float a[3], float b[3]){
 }
 void normalize(float *nResult, float v[3]){
    float m = sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
- nResult[0]= v[0]/m;
+   nResult[0]= v[0]/m;
    nResult[1]= v[1]/m;
    nResult[2]= v[2]/m;
 }
@@ -576,25 +578,30 @@ void compute_normal(float *result, int x, int z, bool upper) {
    if (z-5 == terrain.height) return;
    if (x+5 > terrain.width) return;
    if (z+5 > terrain.height) return;
-   float e1[3] = {1.0f,float(RED(PIXEL(terrain, x, z+1)))-float(RED(PIXEL(terrain, x, z))),0.0f};
-   float e2[3] = {0.0f,float(RED(PIXEL(terrain, x+1, z)))-float(RED(PIXEL(terrain, x, z))),1.0f};
-   float e3[3] = {-1.0f,float(RED(PIXEL(terrain, x+1, z)))-   float(RED(PIXEL(terrain, x, z+1))),1.0f};
-   float e4[3] = {0.0f,float(RED(PIXEL(terrain, x+1, z+1)))- float(RED(PIXEL(terrain, x, z+1))), 1.0f};
+   float e2[3] = {0.0f,float(RED(PIXEL(terrain, x, z+1)))-float(RED(PIXEL(terrain, x, z))),1.0f};
+   float e1[3] = {1.0f,float(RED(PIXEL(terrain, x+1, z)))-float(RED(PIXEL(terrain, x, z))),0.0f};
+   float e3[3] = {1.0f,float(RED(PIXEL(terrain, x+1, z)))-   float(RED(PIXEL(terrain, x, z+1))),-1.0f};
+   float e4[3] = {1.0f,float(RED(PIXEL(terrain, x+1, z+1)))- float(RED(PIXEL(terrain, x, z+1))), 0.0f};
    if(upper){
-       result[0] = e1[1]*e2[2]-e1[2]*e2[1];
-       result[1] = e1[2]*e2[0]-e1[0]*e2[2];
-       result[2] = e1[0]*e2[1]-e1[1]*e2[0];
-       return;
-   }else{
-       result[0] = e3[1]*e4[2]-e3[2]*e4[1];
-       result[1] = e3[2]*e4[0]-e3[0]*e4[2];
-       result[2] = e3[0]*e4[1]-e3[1]*e4[0];
-       result[0] = -result[0];
-       result[1] = -result[1];
-       result[2] = -result[2];
+       cross(result,e1,e2);
        
-       return;
+//       result[0] = e1[1]*e2[2]-e1[2]*e2[1];
+//       result[1] = e1[2]*e2[0]-e1[0]*e2[2];
+//       result[2] = e1[0]*e2[1]-e1[1]*e2[0];
+//       return;
+   }else{
+       cross(result,e3,e4);
+//       result[0] = e3[1]*e4[2]-e3[2]*e4[1];
+//       result[1] = e3[2]*e4[0]-e3[0]*e4[2];
+//       result[2] = e3[0]*e4[1]-e3[1]*e4[0];
+//       result[0] = -result[0];
+//       result[1] = -result[1];
+//       result[2] = -result[2];
+//
+//       return;
    }
+    normalize(result,result);
+    return;
    
 }
 void spin() {
@@ -818,14 +825,21 @@ void rotateAnimal(animal *an){
     int x = an->animalMoveX;
     int z = an->animalMoveZ;
     float the_normal[3];//
-    compute_Vnormal(the_normal, x, z, true);
+    bool upper = false;
+    if (1-(x-floor(x)) > (z-floor(z))) upper=true;
+    compute_normal(the_normal, x, z, upper);
+    printf("x:%f, y:%f, z%f,\n",the_normal[0],the_normal[1],the_normal[2]);
     float the_up_vector[3] = {0.0f,-1.0f,0.0f};
     float rotateV[3];
     cross(rotateV, the_up_vector,the_normal);
     float dot = 0.0;
     dot = the_up_vector[0]*the_normal[0];
-    dot += the_up_vector[1]*the_normal[2];
-    dot += the_up_vector[1]*the_normal[2];
+    dot += the_up_vector[1]*the_normal[1];
+    dot += the_up_vector[2]*the_normal[2];
+    printf("dot: %f\n",dot);
+    
+    dot = acos(dot)*(180.0f/PI);
+    printf("acros dot: %f\n",dot);
     
     an->rotationAngle = dot;
     an->rotationVector[0] = rotateV[0];
@@ -841,16 +855,33 @@ void rotateAnimal(animal *an){
 }
 
 void findHeight(animal *an){
-//    an->animalMoveY = float(RED(PIXEL(terrain, (int)an->animalMoveX, (int)an->animalMoveZ)));
-    int xF = floor(an->animalMoveX);
-    int zF = floor(an->animalMoveZ);
-    int xC = ceil(an->animalMoveX);
-    int zC = ceil(an->animalMoveZ);
-    int sam1 = float(RED(PIXEL(terrain, xF, zF)));
-    int sam2 = float(RED(PIXEL(terrain, xC, zC)));
-    int sam3 = float(RED(PIXEL(terrain, xF, zC)));
-    int sam4 = float(RED(PIXEL(terrain, xC, zF)));
-    an->animalMoveY = (float)((sam1+sam2+sam3+sam4)/4);
+    float x = an->animalMoveX;
+    float z = an->animalMoveZ;
+    float x1 = floor(an->animalMoveX);
+    float z1 = floor(an->animalMoveZ);
+    float x2 = ceil(an->animalMoveX);
+    float z2 = ceil(an->animalMoveZ);
+    
+    int q11 = float(RED(PIXEL(terrain, (int)x1, (int)z1)));
+    int q12 = float(RED(PIXEL(terrain, (int)x1, (int)z2)));
+    int q21 = float(RED(PIXEL(terrain, (int)x2, (int)z1)));
+    int q22 = float(RED(PIXEL(terrain, (int)x2, (int)z2)));
+//    printf("x:%f, y: %f, x1: %f, x2: %f, z1: %f, z2: %f, q11: %d, q12: %d, q21: %d, q22: %d \n",x,z,x1,x2,z1,z2,q11,q12,q21,q22);
+    
+    float r1 = q11*(x2-x)*(z2-z);
+    r1 += q21*(x-x1)*(z2-z);
+    r1 += q12*(x2-x)*(z-z1);
+    r1 += q22*(x-x1)*(z-z1);
+    
+    float result = (x2-x1)*(z2-z1);
+    result = 1/result;
+    result = result*r1;
+    printf("result: %f\n",result);
+    //    int result = (q11*(x2-x)*(z2-z));
+    //    result =(q21*(x-x1)*(z2-z));
+    //    result =(q12*(x2-x)*(z-z1));
+    //    result =(q22*(x-x1)*(z-z1));
+    an->animalMoveY = result;
     
 }
 
@@ -862,7 +893,7 @@ void update2(animal *an){
     
     
     if (an->id == 1){
-        an->animalMoveT += 0.009f;
+        an->animalMoveT += 0.01f;
 //        an->animalMoveT= animalMoveT;
         
         float dx = an->animalMoveX - (x +cos(an->animalMoveT)*50);
@@ -921,20 +952,21 @@ void animalMove(){
     
     
     update2(&an1);
-    update2(&an2);
-    update2(&an3);
+//    update2(&an2);
+//    update2(&an3);
     glPushMatrix();
     glTranslatef(an1.animalMoveX,an1.animalMoveY,an1.animalMoveZ);
+    glRotatef((an1.rotationAngle),an1.rotationVector[0],an1.rotationVector[1],an1.rotationVector[2]);
     glRotatef(an1.animalForwardAngle,0.0f,1.0f,0.0f);
-    glRotatef((an1.rotationAngle)*-2,an1.rotationVector[0],an1.rotationVector[1],an1.rotationVector[2]);
+    
     animalTime();
     glPopMatrix();
-//    printf("rotation Angle: %f\n",an1.rotationAngle);
+    printf("rotation Angle: %f\n",an1.rotationAngle);
     
     glPushMatrix();
     glTranslatef(an2.animalMoveX,an2.animalMoveY,an2.animalMoveZ);
     glRotatef(an2.animalForwardAngle,0.0f,1.0f,0.0f);
-    glRotatef((an2.rotationAngle)*-2,an2.rotationVector[0],an2.rotationVector[1],an2.rotationVector[2]);
+//    glRotatef((an2.rotationAngle)*-2,an2.rotationVector[0],an2.rotationVector[1],an2.rotationVector[2]);
     
     animalTime();
     glPopMatrix();
@@ -942,7 +974,7 @@ void animalMove(){
     glPushMatrix();
     glTranslatef(an3.animalMoveX,an3.animalMoveY,an3.animalMoveZ);
     glRotatef(an3.animalForwardAngle,0.0f,1.0f,0.0f);
-    glRotatef((an3.rotationAngle)*-2,an3.rotationVector[0],an3.rotationVector[1],an3.rotationVector[2]);
+//    glRotatef((an3.rotationAngle)*-2,an3.rotationVector[0],an3.rotationVector[1],an3.rotationVector[2]);
     
     animalTime();
     glPopMatrix();
@@ -986,6 +1018,11 @@ void cb_display() {
                   an1.animalMoveX,an1.animalMoveY,an1.animalMoveZ,
                   0,1,0);
 //         glRotatef(an1.animalForwardAngle,0.0f,1.0f,0.0f);
+    }
+    if(look == 5){
+        gluLookAt(an1.animalMoveX + 10,an1.animalMoveY ,an1.animalMoveZ - 10,
+                  an1.animalMoveX,an1.animalMoveY,an1.animalMoveZ,
+                  0,1,0);
     }
     if(look == 2){
         gluLookAt(an2.animalMoveX + 10,an2.animalMoveY + 30 ,an2.animalMoveZ - 10,
@@ -1157,6 +1194,7 @@ void cb_keyboard(unsigned char key, int x, int y) {
     if (key == '2') look = 2;
     if (key == '3') look = 3;
     if (key == '4') look = 4;
+    if (key == '5') look = 5;
    if (key == 'b'){
        dListOn = !dListOn;
    }
